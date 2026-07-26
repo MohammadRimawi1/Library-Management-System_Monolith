@@ -1,0 +1,30 @@
+package com.exalt.library.security;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * Integration tests for the application's security configuration.
+ * @author Mohammad Rimawi
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+public class SecurityIntegrationTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    /**
+     * Requests to protected endpoints without a JWT should return error.
+     */
+    @Test
+    void protectedRoute_returns401_whenNoTokenProvided() throws Exception {
+        mockMvc.perform(get("/api/borrowers"))
+                .andExpect(status().isUnauthorized());
+    }
+}
