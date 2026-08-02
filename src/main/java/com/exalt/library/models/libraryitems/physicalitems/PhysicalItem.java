@@ -2,6 +2,10 @@ package com.exalt.library.models.libraryitems.physicalitems;
 
 import com.exalt.library.models.libraryitems.LibraryItem;
 
+/**
+ * A class representing the physical item that exists in the library as a physical object
+ * @author Mohammad Rimawi
+ */
 public class PhysicalItem extends LibraryItem {
     private int numOfCopies; // Represents how many physical object exists inside the library
 

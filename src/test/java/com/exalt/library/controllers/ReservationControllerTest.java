@@ -130,8 +130,8 @@ class ReservationControllerTest {
     @WithMockUser
     void findReservationsByStatus_returns200WithList() throws Exception {
         Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.WAITING);
-        when(reservationServices.findReservationsByStatus(ReservationStatus.WAITING)).thenReturn(List.of(reservation));
+        reservation.setStatus(ReservationStatus.PENDING);
+        when(reservationServices.findReservationsByStatus(ReservationStatus.PENDING)).thenReturn(List.of(reservation));
 
         mockMvc.perform(get("/api/reservations/status/waiting"))
                 .andExpect(status().isOk())
@@ -164,7 +164,7 @@ class ReservationControllerTest {
         when(userServices.findByEmail("test@test.com")).thenReturn(user);
 
         Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.WAITING);
+        reservation.setStatus(ReservationStatus.PENDING);
         when(reservationServices.reserve(any(), any())).thenReturn(reservation);
 
         mockMvc.perform(post("/api/reservations")

@@ -34,7 +34,7 @@ public class Reservation {
      * A default constructor
      */
     public Reservation() {
-        this.status = ReservationStatus.WAITING;
+        this.status = ReservationStatus.PENDING;
     }
 
 //    ==== GETTERS ====
