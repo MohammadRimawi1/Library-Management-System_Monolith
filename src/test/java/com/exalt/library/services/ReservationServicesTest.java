@@ -1,7 +1,6 @@
 package com.exalt.library.services;
 
 import com.exalt.library.exceptions.ReservationNotFoundException;
-import com.exalt.library.models.*;
 import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.models.libraryitems.physicalitems.PhysicalItem;
 import com.exalt.library.models.reservation.Reservation;
@@ -88,7 +87,7 @@ class ReservationServicesTest {
 
         Reservation result = reservationServices.reserve("borrower-1", "item-1");
 
-        assertEquals(ReservationStatus.WAITING, result.getStatus());
+        assertEquals(ReservationStatus.PENDING, result.getStatus());
         verify(borrowStrategy, never()).activate(any());
         verify(reservationRepository).save(result);
     }

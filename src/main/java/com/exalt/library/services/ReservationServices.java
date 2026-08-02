@@ -1,6 +1,5 @@
 package com.exalt.library.services;
 
-import com.exalt.library.dto.ReserveDTO;
 import com.exalt.library.models.users.Role;
 import com.exalt.library.models.users.User;
 import com.exalt.library.repositories.ReservationRepository;
@@ -16,7 +15,6 @@ import com.exalt.library.models.libraryitems.onlineitems.OnlineItem;
 import com.exalt.library.models.reservation.Reservation;
 import com.exalt.library.models.reservation.ReservationStatus;
 import com.exalt.library.util.SecurityUtils;
-import com.exalt.library.validation.ReserveValidator;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -159,7 +157,7 @@ public class ReservationServices implements ReservationOperations {
         List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
                 .filter(reservation -> reservation.getLibraryItem().getId().equals(item.getId()) &&
-                        reservation.getStatus() == ReservationStatus.WAITING)
+                        reservation.getStatus() == ReservationStatus.PENDING)
                 .min(Comparator.comparing(Reservation::getStartDate))
                 .orElseThrow(() -> new ReservationNotFoundException("No waiting reservation for this item"));
     }
@@ -193,11 +191,11 @@ public class ReservationServices implements ReservationOperations {
             throw new AccessDeniedException("You do not have permission to cancel this reservation");
         }
 
-        if (reservation.getStatus() != ReservationStatus.WAITING && reservation.getStatus() != ReservationStatus.READY) {
+        if (reservation.getStatus() != ReservationStatus.PENDING && reservation.getStatus() != ReservationStatus.READY) {
             throw new IllegalStateException("Only WAITING or READY reservations can be cancelled");
         }
 
-        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setStatus(ReservationStatus.CANCELED);
         reservationRepository.save(reservation);
         return true;
     }

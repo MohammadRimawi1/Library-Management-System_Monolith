@@ -77,7 +77,8 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     *
+     * catches access denied errors when a user lacks required authorities or roles
+     * 403 status
      * @param e
      * @return
      */
@@ -86,6 +87,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(ApiResponse.error(403, "Forbidden", e.getMessage()));
     }
 
+    /**
+     * catches static resource or endpoint path resolution failures
+     * 404 status
+     * @param e
+     * @return
+     */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNoResourceFound(NoResourceFoundException e) {
         return ResponseEntity.status(404).body(ApiResponse.error(404, "Not Found", "The requested resource does not exist"));

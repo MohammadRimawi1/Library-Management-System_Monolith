@@ -2,10 +2,12 @@ package com.exalt.library.repositories;
 
 import com.exalt.library.models.libraryitems.LibraryItem;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for managing LibraryItem documents in MongoDB.
  * Provides standard CRUD operations inherited from MongoRepository
  */
+@Repository
 public interface LibraryItemRepository extends MongoRepository<LibraryItem, String> {
 }
