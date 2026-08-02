@@ -210,36 +210,5 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.data.returned").value(true));
     }
 
-    /**
-     * Claiming a ready reservation should return HTTP 200 with the claimed reservation.
-     */
-    @Test
-    @WithMockUser
-    void claim_returns200_withClaimedReservation() throws Exception {
-        Reservation reservation = new Reservation();
-        Reservation claimed = new Reservation();
-        claimed.setStatus(ReservationStatus.ACTIVE);
 
-        when(reservationServices.findReservationById("123")).thenReturn(reservation);
-        when(reservationServices.claimReservation(reservation)).thenReturn(claimed);
-
-        mockMvc.perform(post("/api/reservations/123/claim"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("ACTIVE"));
-    }
-
-    /**
-     * Cancelling a reservation should return HTTP 200 with the cancelled flag.
-     */
-    @Test
-    @WithMockUser
-    void cancel_returns200_withCancelledFlag() throws Exception {
-        Reservation reservation = new Reservation();
-        when(reservationServices.findReservationById("123")).thenReturn(reservation);
-        when(reservationServices.cancelReservation(reservation)).thenReturn(true);
-
-        mockMvc.perform(delete("/api/reservations/123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.cancelled").value(true));
-    }
 }

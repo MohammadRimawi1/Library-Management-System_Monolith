@@ -3,6 +3,7 @@ package com.exalt.library.controllers;
 import com.exalt.library.dto.ReserveDTO;
 import com.exalt.library.models.reservation.Reservation;
 import com.exalt.library.models.reservation.ReservationStatus;
+import com.exalt.library.models.users.Role;
 import com.exalt.library.models.users.User;
 import com.exalt.library.services.ReservationServices;
 import com.exalt.library.services.UserServices;
@@ -41,7 +42,14 @@ public class ReservationController  {
      */
     @GetMapping
     public ResponseEntity<Map<String, Object>> findAll() {
-        return ResponseEntity.ok(ApiResponse.success(200, reservationServices.getAllReservations()));
+        User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
+
+        if (currentUser.getRole() == Role.LIBRARIAN) {
+            return ResponseEntity.ok(ApiResponse.success(200, reservationServices.getAllReservations()));
+        }
+
+        List<Reservation> ownReservations = reservationServices.findReservationsByBorrower(currentUser.getBorrower().getId());
+        return ResponseEntity.ok(ApiResponse.success(200, ownReservations));
     }
 
     /**
@@ -82,18 +90,6 @@ public class ReservationController  {
     }
 
     /**
-     * A method for fetching the reservations with a specific status
-     * @param status
-     * @return
-     */
-    @GetMapping("/status/{status}")
-    public ResponseEntity<Map<String, Object>> findReservationsByStatus(@PathVariable String status) {
-        ReservationStatus reservationStatus = ReservationStatus.valueOf(status.toUpperCase());
-        List<Reservation> reservations = reservationServices.findReservationsByStatus(reservationStatus);
-        return ResponseEntity.ok(ApiResponse.success(200, reservations));
-    }
-
-    /**
      * a method for creating a serving request for a reservation
      * exists on: /api/reservations
      * @param reserveDTO
@@ -125,29 +121,4 @@ public class ReservationController  {
         return ResponseEntity.ok(ApiResponse.success(200, Map.of("returned", closed)));
     }
 
-    /**
-     * a method for claiming a specific reservation
-     * exists on: /api/reservations/{id}/claim
-     * @param id
-     * @return
-     */
-    @PostMapping("/{id}/claim")
-    public ResponseEntity<Map<String, Object>> claim(@PathVariable String id) {
-        Reservation reservation = reservationServices.findReservationById(id);
-        Reservation claimed = reservationServices.claimReservation(reservation);
-        return ResponseEntity.ok(ApiResponse.success(200, claimed));
-    }
-
-    /**
-     * a method for canceling a specific reservation
-     * exists on: /api/reservations/{id}
-     * @param id
-     * @return
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> cancel(@PathVariable String id) {
-        Reservation reservation = reservationServices.findReservationById(id);
-        boolean cancelled = reservationServices.cancelReservation(reservation);
-        return ResponseEntity.ok(ApiResponse.success(200, Map.of("cancelled", cancelled)));
-    }
 }

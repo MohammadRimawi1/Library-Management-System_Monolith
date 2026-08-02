@@ -1,7 +1,5 @@
 package com.exalt.library.services;
 
-import com.exalt.library.models.users.Role;
-import com.exalt.library.models.users.User;
 import com.exalt.library.repositories.ReservationRepository;
 import com.exalt.library.services.operations.BorrowerOperations;
 import com.exalt.library.services.operations.LibraryItemOperations;
@@ -14,8 +12,6 @@ import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.models.libraryitems.onlineitems.OnlineItem;
 import com.exalt.library.models.reservation.Reservation;
 import com.exalt.library.models.reservation.ReservationStatus;
-import com.exalt.library.util.SecurityUtils;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -35,8 +31,6 @@ public class ReservationServices implements ReservationOperations {
     private final BorrowerOperations borrowerOperations; // Defines the borrower operations
     private final BorrowStrategyFactory borrowStrategyFactory; // Defines the borrower strategy factory
 
-    private final UserServices userServices; // Defines the user services
-
     /**
      * constructor injection
      * @param libraryItemOperations
@@ -47,14 +41,12 @@ public class ReservationServices implements ReservationOperations {
             LibraryItemOperations libraryItemOperations,
             BorrowerOperations borrowerOperations,
             BorrowStrategyFactory borrowStrategyFactory,
-            ReservationRepository reservationRepository,
-            UserServices userServices
+            ReservationRepository reservationRepository
     ) {
         this.libraryItemOperations = libraryItemOperations;
         this.borrowerOperations = borrowerOperations;
         this.borrowStrategyFactory = borrowStrategyFactory;
         this.reservationRepository = reservationRepository;
-        this.userServices = userServices;
     }
 
     /**
@@ -118,8 +110,8 @@ public class ReservationServices implements ReservationOperations {
 
     /**
      * a method used to let a borrower reserve a specific item.
-     * if the item is available, the reservation is activated immediately (this replaces the old "loan" path)
-     * if not, the reservation is queued as WAITING until the item comes back
+     * if the item is available, the reservation is activated immediately
+     * if not, the reservation is queued as PENDING until the item comes back
      * @param borrowerId
      * @param itemId
      * @return the created reservation
@@ -141,6 +133,7 @@ public class ReservationServices implements ReservationOperations {
         BorrowStrategy strategy = borrowStrategyFactory.resolve(item);
         if (item.isAvailable()) {
             strategy.activate(reservation);
+            reservation.setDueDate(new Date());
         }
 
         reservationRepository.save(reservation);
@@ -148,7 +141,7 @@ public class ReservationServices implements ReservationOperations {
     }
 
     /**
-     * a method for checking the next waiting reservation for an item
+     * a method for checking the next pending reservation for an item
      * @param item
      * @return
      */
@@ -159,7 +152,7 @@ public class ReservationServices implements ReservationOperations {
                 .filter(reservation -> reservation.getLibraryItem().getId().equals(item.getId()) &&
                         reservation.getStatus() == ReservationStatus.PENDING)
                 .min(Comparator.comparing(Reservation::getStartDate))
-                .orElseThrow(() -> new ReservationNotFoundException("No waiting reservation for this item"));
+                .orElseThrow(() -> new ReservationNotFoundException("No pending reservation for this item"));
     }
 
     /**
@@ -168,7 +161,7 @@ public class ReservationServices implements ReservationOperations {
      */
     @Override
     public void checkAndHandleExpiration(Reservation reservation) {
-        if (reservation.getStatus() == ReservationStatus.READY
+        if (reservation.getStatus() == ReservationStatus.ACTIVE
                 && reservation.getEndDate() != null
                 && new Date().after(reservation.getEndDate())) {
 
@@ -178,31 +171,8 @@ public class ReservationServices implements ReservationOperations {
     }
 
     /**
-     * a method for canceling a specific reservation and deleting it
-     * @param reservation
-     * @return
-     */
-    @Override
-    public boolean cancelReservation(Reservation reservation) {
-        User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
-
-        if (currentUser.getRole() == Role.BORROWER
-                && !reservation.getBorrower().getId().equals(currentUser.getBorrower().getId())) {
-            throw new AccessDeniedException("You do not have permission to cancel this reservation");
-        }
-
-        if (reservation.getStatus() != ReservationStatus.PENDING && reservation.getStatus() != ReservationStatus.READY) {
-            throw new IllegalStateException("Only WAITING or READY reservations can be cancelled");
-        }
-
-        reservation.setStatus(ReservationStatus.CANCELED);
-        reservationRepository.save(reservation);
-        return true;
-    }
-
-    /**
      * a method to close an active reservation so the item becomes available again,
-     * and promote the next waiting reservation (if any) into READY status
+     * and promote the next pending reservation (if any) straight to ACTIVE
      * @param reservation
      * @param libraryItem
      */
@@ -216,7 +186,7 @@ public class ReservationServices implements ReservationOperations {
         if (next != null) {
             BorrowStrategy strategy = borrowStrategyFactory.resolve(libraryItem);
             strategy.activate(next);
-            next.setAvailableFrom(new Date());
+            next.setDueDate(new Date());
             reservationRepository.save(next);
         }
     }
@@ -240,29 +210,6 @@ public class ReservationServices implements ReservationOperations {
     }
 
     /**
-     * a method for a borrower to claim their READY reservation - actually picking up
-     * the item that was being held for them
-     */
-    @Override
-    public Reservation claimReservation(Reservation reservation) {
-        User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
-
-        if (currentUser.getRole() == Role.BORROWER
-                && !reservation.getBorrower().getId().equals(currentUser.getBorrower().getId())) {
-            throw new AccessDeniedException("You do not have permission to claim this reservation");
-        }
-
-        if (reservation.getStatus() != ReservationStatus.READY) {
-            throw new IllegalStateException("Reservation is not ready to be claimed");
-        }
-
-        borrowStrategyFactory.resolve(reservation.getLibraryItem()).activate(reservation);
-        reservationRepository.save(reservation);
-
-        return reservation;
-    }
-
-    /**
      * A method for retrieving reservations for a specific borrower
      * @param borrowerId
      * @return
@@ -270,16 +217,6 @@ public class ReservationServices implements ReservationOperations {
     @Override
     public List<Reservation> findReservationsByBorrower(String borrowerId) {
         return reservationRepository.findByBorrowerId(borrowerId);
-    }
-
-    /**
-     * a method for retrieving reservations with a specific status
-     * @param status
-     * @return
-     */
-    @Override
-    public List<Reservation> findReservationsByStatus(ReservationStatus status) {
-        return reservationRepository.findByStatus(status);
     }
 
     /**
