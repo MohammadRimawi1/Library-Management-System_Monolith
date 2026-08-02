@@ -101,7 +101,7 @@ public class MongoSchemaValidatorRunner implements CommandLineRunner {
                 .append("properties", new Document()
                         .append("status", new Document()
                                 .append("bsonType", "string")
-                                .append("enum", List.of("WAITING", "READY", "ACTIVE", "RETURNED", "EXPIRED", "CANCELLED"))
+                                .append("enum", List.of("PENDING", "ACTIVE", "RETURNED", "EXPIRED"))
                                 .append("description", "must be one of the defined reservation statuses"))
                 )
         );

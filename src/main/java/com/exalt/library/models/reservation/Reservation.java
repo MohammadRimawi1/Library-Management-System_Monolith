@@ -122,13 +122,13 @@ public class Reservation {
     }
 
     /**
-     * a method for setting the date when the item is available for the reservation life-time to start
-     * @param availableFrom
+     * a method for setting the due date of an active loan, 14 days from the moment it's activated.
+     * used to determine when an ACTIVE reservation should flip to EXPIRED if not returned in time.
+     * @param activatedAt the moment this reservation became ACTIVE
      */
-    public void setAvailableFrom(Date availableFrom) {
-        this.availableFrom = availableFrom;
-        this.endDate = new Date(getAvailableFrom().getTime() + 3L * 24 * 60 * 60 * 1000); // 3 days
-        this.status = ReservationStatus.READY;
+    public void setDueDate(Date activatedAt) {
+        this.availableFrom = activatedAt;
+        this.endDate = new Date(activatedAt.getTime() + 14L * 24 * 60 * 60 * 1000); // 14 days
     }
 
     /**

@@ -71,12 +71,12 @@ public interface ReservationOperations {
     Reservation reserve(String borrowerId, String itemId);
 
     /**
-     * a method for checking the next waiting reservation for an item
+     * a method for checking the next pending reservation for an item
      * implemented inside ReservationServices
      * @param item
      * @return
      */
-    Reservation findNextWaitingReservation( LibraryItem item);
+    Reservation findNextWaitingReservation(LibraryItem item);
 
     /**
      * a method for handling the expiration of a reservation
@@ -86,16 +86,8 @@ public interface ReservationOperations {
     void checkAndHandleExpiration(Reservation reservation);
 
     /**
-     * a method for canceling a specific reservation and deleting it
-     * implemented inside ReservationServices
-     * @param reservation
-     * @return
-     */
-    boolean cancelReservation(Reservation reservation);
-
-    /**
      * a method to close an active reservation so the item becomes available again,
-     * and hold it for the next waiting reservation (if any)
+     * and promote the next pending reservation (if any) straight to ACTIVE
      * @param reservation
      * @param libraryItem
      */
@@ -112,25 +104,9 @@ public interface ReservationOperations {
     boolean returnItem(String borrowerId, String itemId);
 
     /**
-     * a method for a borrower to claim their READY reservation
-     * the item that was being held for them, activating it
-     * @param reservation the READY reservation being claimed
-     * @return the now-ACTIVE reservation
-     * @throws IllegalStateException if the reservation isn't in READY status
-     */
-    Reservation claimReservation(Reservation reservation);
-
-    /**
      * A method for retrieving reservations for a specific borrower
      * @param borrowerId
      * @return
      */
     List<Reservation> findReservationsByBorrower(String borrowerId);
-
-    /**
-     * a method for retrieving reservations with a specific status
-     * @param status
-     * @return
-     */
-    List<Reservation> findReservationsByStatus(ReservationStatus status);
 }
