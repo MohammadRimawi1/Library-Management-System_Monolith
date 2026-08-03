@@ -1,13 +1,11 @@
 package com.exalt.library.services.operations;
 
-import com.exalt.library.dto.ReserveDTO;
 import com.exalt.library.models.users.Borrower;
 import com.exalt.library.exceptions.BorrowerNotFoundException;
 import com.exalt.library.exceptions.ItemNotFoundException;
 import com.exalt.library.exceptions.ReservationNotFoundException;
 import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.models.reservation.Reservation;
-import com.exalt.library.models.reservation.ReservationStatus;
 
 import java.util.List;
 
@@ -33,14 +31,15 @@ public interface ReservationOperations {
     Reservation findReservationById(String id);
 
     /**
-     * Finds an active reservation matching the borrower and the item ids
+     * Finds an active reservation matching the borrower, the item, and the specific copy
      * implemented inside ReservationServices
      * @param borrowerId
      * @param itemId
+     * @param copyNumber
      * @return the active reservation
      * @throws ReservationNotFoundException if it doesn't exist
      */
-    Reservation findActiveReservation(String borrowerId, String itemId);
+    Reservation findActiveReservation(String borrowerId, String itemId, int copyNumber);
 
     /**
      * a method for checking if the item exists
@@ -62,21 +61,23 @@ public interface ReservationOperations {
 
 
     /**
-     * a method used to let a borrower reserve a specific item regardless of its availability
+     * a method used to let a borrower reserve a specific copy of an item
      * implemented inside ReservationServices
      * @param borrowerId
      * @param itemId
+     * @param copyNumber
      * @return
      */
-    Reservation reserve(String borrowerId, String itemId);
+    Reservation reserve(String borrowerId, String itemId, int copyNumber);
 
     /**
-     * a method for checking the next pending reservation for an item
+     * a method for checking the next pending reservation for a specific copy of an item
      * implemented inside ReservationServices
      * @param item
+     * @param copyNumber
      * @return
      */
-    Reservation findNextWaitingReservation(LibraryItem item);
+    Reservation findNextWaitingReservation(LibraryItem item, int copyNumber);
 
     /**
      * a method for handling the expiration of a reservation
@@ -86,22 +87,23 @@ public interface ReservationOperations {
     void checkAndHandleExpiration(Reservation reservation);
 
     /**
-     * a method to close an active reservation so the item becomes available again,
-     * and promote the next pending reservation (if any) straight to ACTIVE
+     * a method to close an active reservation so that specific copy becomes available again,
+     * and hold it for the next waiting reservation for that same copy (if any)
      * @param reservation
      * @param libraryItem
      */
     void closeReservation(Reservation reservation, LibraryItem libraryItem);
 
     /**
-     * a method which returns a borrowed item and closes its active reservation
+     * a method which returns a specific borrowed copy and closes its active reservation
      * implemented inside ReservationServices
      * @param borrowerId
      * @param itemId
+     * @param copyNumber
      * @return true if the reservation was closed
      * @throws ReservationNotFoundException if no active reservation is found
      */
-    boolean returnItem(String borrowerId, String itemId);
+    boolean returnItem(String borrowerId, String itemId, int copyNumber);
 
     /**
      * A method for retrieving reservations for a specific borrower

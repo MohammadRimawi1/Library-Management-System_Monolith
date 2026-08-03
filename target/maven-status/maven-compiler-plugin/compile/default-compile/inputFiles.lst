@@ -1,3 +1,4 @@
+C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\aop\LoggingAspect.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\config\MongoSchemaValidatorRunner.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\config\SecurityBeansConfig.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\config\SecurityConfig.java
@@ -23,6 +24,7 @@ C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\c
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\models\libraryitems\onlineitems\OnlineItem.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\models\libraryitems\onlineitems\StoryOnline.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\models\libraryitems\physicalitems\BookPhysical.java
+C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\models\libraryitems\physicalitems\Copy.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\models\libraryitems\physicalitems\PhysicalItem.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\models\libraryitems\physicalitems\StoryPhysical.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\models\reservation\Reservation.java
@@ -52,7 +54,6 @@ C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\c
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\services\operations\UserOperations.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\services\ReservationServices.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\services\strategies\BorrowStrategy.java
-C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\services\strategies\Reservable.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\services\UserServices.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\util\ApiResponse.java
 C:\Users\t-mohammad.rimawi\Desktop\Library Management System\LMS\src\main\java\com\exalt\library\util\SecurityUtils.java

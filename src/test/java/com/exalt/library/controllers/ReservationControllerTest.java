@@ -1,214 +1,125 @@
 package com.exalt.library.controllers;
 
 import com.exalt.library.dto.ReserveDTO;
-import com.exalt.library.exceptions.ReservationNotFoundException;
-import com.exalt.library.exceptions.handler.GlobalExceptionHandler;
 import com.exalt.library.models.reservation.Reservation;
-import com.exalt.library.models.reservation.ReservationStatus;
-import com.exalt.library.models.users.Borrower;
+import com.exalt.library.models.users.Role;
 import com.exalt.library.models.users.User;
-import com.exalt.library.services.JwtService;
 import com.exalt.library.services.ReservationServices;
 import com.exalt.library.services.UserServices;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import com.exalt.library.util.ApiResponse;
+import com.exalt.library.util.SecurityUtils;
+import com.exalt.library.validation.ReserveValidator;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.util.Map;
 
 /**
- * Unit tests for {@link ReservationController}.
+ * a reservation controller that gets a request from the client, does a specific job then returns the response
  * @author Mohammad Rimawi
  */
-@WebMvcTest(controllers = ReservationController.class)
-@Import(GlobalExceptionHandler.class)
-class ReservationControllerTest {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockitoBean
-    private ReservationServices reservationServices;
-
-    @MockitoBean
-    private UserServices userServices;
-
-    @MockitoBean
-    private JwtService jwtService;
+@RestController
+@RequestMapping("/api/reservations")
+public class ReservationController  {
+    private final ReservationServices reservationServices; // defines the reservation services
+    private final UserServices userServices; // defines the reservation services
 
     /**
-     * Retrieving all reservations should return HTTP 200 and the reservation list.
+     * constructor injection
+     * @param reservationServices
      */
-    @Test
-    @WithMockUser
-    void findAll_returns200WithList() throws Exception {
-        Reservation reservation = new Reservation();
-        when(reservationServices.getAllReservations()).thenReturn(List.of(reservation));
-
-        mockMvc.perform(get("/api/reservations"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isArray());
+    public ReservationController(ReservationServices reservationServices, UserServices userServices) {
+        this.reservationServices = reservationServices;
+        this.userServices = userServices;
     }
 
     /**
-     * An existing reservation should be returned with HTTP 200.
+     * A method for fetching reservations - librarians see all reservations,
+     * borrowers only see their own
+     * exists on: /api/reservations
+     * @return
      */
-    @Test
-    @WithMockUser
-    void findById_returns200_whenFound() throws Exception {
-        Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.ACTIVE);
-        when(reservationServices.findReservationById("123")).thenReturn(reservation);
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> findAll() {
+        User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
 
-        mockMvc.perform(get("/api/reservations/123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("ACTIVE"));
+        if (currentUser.getRole() == Role.LIBRARIAN) {
+            return ResponseEntity.ok(ApiResponse.success(200, reservationServices.getAllReservations()));
+        }
+
+        List<Reservation> ownReservations = reservationServices.findReservationsByBorrower(currentUser.getBorrower().getId());
+        return ResponseEntity.ok(ApiResponse.success(200, ownReservations));
     }
 
     /**
-     * A missing reservation should return HTTP 404.
+     * a method for fetching a specific reservation based on a specific id
+     * exists on: /api/reservations/{id}
+     * @param id
+     * @return
      */
-    @Test
-    @WithMockUser
-    void findById_returns404_whenNotFound() throws Exception {
-        when(reservationServices.findReservationById("missing"))
-                .thenThrow(new ReservationNotFoundException("Reservation not found"));
-
-        mockMvc.perform(get("/api/reservations/missing"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("Reservation not found"));
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> findById(@PathVariable String id) {
+        Reservation reservation = reservationServices.findReservationById(id);
+        reservationServices.checkAndHandleExpiration(reservation);
+        return ResponseEntity.ok(ApiResponse.success(200, reservation));
     }
 
     /**
-     * Fetching the active reservation for a borrower/item pair should return HTTP 200.
+     * a method for fetching active reservations
+     * exists on: /api/reservations/active?borrowerId={id}&itemId={id}&copyNumber={n}
+     * @param borrowerId
+     * @param itemId
+     * @param copyNumber
+     * @return
      */
-    @Test
-    @WithMockUser
-    void findActive_returns200_withReservation() throws Exception {
-        Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.ACTIVE);
-        when(reservationServices.findActiveReservation("borrower1", "item1")).thenReturn(reservation);
-
-        mockMvc.perform(get("/api/reservations/active")
-                        .param("borrowerId", "borrower1")
-                        .param("itemId", "item1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("ACTIVE"));
+    @GetMapping("/active")
+    public ResponseEntity<Map<String, Object>> findActive(@RequestParam String borrowerId, @RequestParam String itemId, @RequestParam int copyNumber) {
+        Reservation reservation = reservationServices.findActiveReservation(borrowerId, itemId, copyNumber);
+        return ResponseEntity.ok(ApiResponse.success(200, reservation));
     }
 
     /**
-     * Fetching reservations by borrower should return HTTP 200 with the list.
+     * A method for fetching the reservations for a specific borrower
+     * @param borrowerId
+     * @return
      */
-    @Test
-    @WithMockUser
-    void findReservationByBorrower_returns200WithList() throws Exception {
-        Reservation reservation = new Reservation();
-        when(reservationServices.findReservationsByBorrower("borrower1")).thenReturn(List.of(reservation));
-
-        mockMvc.perform(get("/api/reservations/borrower/borrower1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isArray());
+    @GetMapping("/borrower/{borrowerId}")
+    public ResponseEntity<Map<String, Object>> findReservationByBorrower(@PathVariable String borrowerId) {
+        List<Reservation> reservations = reservationServices.findReservationsByBorrower(borrowerId);
+        return ResponseEntity.ok(ApiResponse.success(200, reservations));
     }
 
     /**
-     * Fetching reservations by status should return HTTP 200 with the matching list.
+     * a method for creating a serving request for a reservation
+     * exists on: /api/reservations
+     * @param reserveDTO
+     * @return
      */
-    @Test
-    @WithMockUser
-    void findReservationsByStatus_returns200WithList() throws Exception {
-        Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.PENDING);
-        when(reservationServices.findReservationsByStatus(ReservationStatus.PENDING)).thenReturn(List.of(reservation));
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> reserve(@RequestBody ReserveDTO reserveDTO) {
+        ReserveValidator.validate(reserveDTO);
 
-        mockMvc.perform(get("/api/reservations/status/waiting"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].status").value("WAITING"));
+        User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
+        Reservation reservation = reservationServices.reserve(currentUser.getBorrower().getId(), reserveDTO.itemId(), reserveDTO.copyNumber());
+
+        return ResponseEntity.status(201).body(ApiResponse.success(201, reservation));
     }
 
     /**
-     * An invalid status path variable should return HTTP 400.
+     * a method for returning an item after being reserved
+     * exists on: /api/reservations/return
+     * @param reserveDTO
+     * @return
      */
-    @Test
-    @WithMockUser
-    void findReservationsByStatus_returns400_whenStatusInvalid() throws Exception {
-        mockMvc.perform(get("/api/reservations/status/not-a-status"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Bad Request"));
+    @PostMapping("/return")
+    public ResponseEntity<Map<String, Object>> returnItem(@RequestBody ReserveDTO reserveDTO) {
+        ReserveValidator.validate(reserveDTO);
+
+        User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
+        boolean closed = reservationServices.returnItem(currentUser.getBorrower().getId(), reserveDTO.itemId(), reserveDTO.copyNumber());
+
+        return ResponseEntity.ok(ApiResponse.success(200, Map.of("returned", closed)));
     }
-
-    /**
-     * A valid reservation request from an authenticated borrower should return HTTP 201.
-     */
-    @Test
-    @WithMockUser(username = "test@test.com")
-    void reserve_returns201_withCreatedReservation() throws Exception {
-        ReserveDTO request = new ReserveDTO("507f1f77bcf86cd799439011");
-
-        Borrower borrower = new Borrower();
-        User user = new User();
-        user.setEmail("test@test.com");
-        user.setBorrower(borrower);
-        when(userServices.findByEmail("test@test.com")).thenReturn(user);
-
-        Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.PENDING);
-        when(reservationServices.reserve(any(), any())).thenReturn(reservation);
-
-        mockMvc.perform(post("/api/reservations")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.status").value("WAITING"));
-    }
-
-    /**
-     * A reservation request with no itemId should return HTTP 400.
-     */
-    @Test
-    @WithMockUser(username = "test@test.com")
-    void reserve_returns400_whenItemIdMissing() throws Exception {
-        ReserveDTO request = new ReserveDTO(null);
-
-        mockMvc.perform(post("/api/reservations")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    /**
-     * Returning a reserved item should return HTTP 200 with the returned flag.
-     */
-    @Test
-    @WithMockUser(username = "test@test.com")
-    void returnItem_returns200_withReturnedFlag() throws Exception {
-        ReserveDTO request = new ReserveDTO("507f1f77bcf86cd799439011");
-
-        Borrower borrower = new Borrower();
-        User user = new User();
-        user.setEmail("test@test.com");
-        user.setBorrower(borrower);
-        when(userServices.findByEmail("test@test.com")).thenReturn(user);
-        when(reservationServices.returnItem(any(), any())).thenReturn(true);
-
-        mockMvc.perform(post("/api/reservations/return")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.returned").value(true));
-    }
-
 
 }

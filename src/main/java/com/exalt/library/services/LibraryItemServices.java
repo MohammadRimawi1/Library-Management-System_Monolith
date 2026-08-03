@@ -2,6 +2,7 @@ package com.exalt.library.services;
 
 import com.exalt.library.dto.LibraryItemDTO;
 import com.exalt.library.models.Author;
+import com.exalt.library.models.libraryitems.physicalitems.Copy;
 import com.exalt.library.models.libraryitems.physicalitems.PhysicalItem;
 import com.exalt.library.repositories.LibraryItemRepository;
 import com.exalt.library.services.factory.LibraryItemFactory;
@@ -11,6 +12,7 @@ import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.validation.LibraryItemValidator;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,9 +55,15 @@ public class LibraryItemServices implements LibraryItemOperations {
         item.setTitle(libraryItemDTO.title());
         item.setDescription(libraryItemDTO.description());
         item.setLanguage(libraryItemDTO.language());
+        item.setLanguage(libraryItemDTO.version());
+        item.setLanguage(libraryItemDTO.image());
 
         if (item instanceof PhysicalItem physicalItem && libraryItemDTO.numOfCopies() != null) {
-            physicalItem.setNumOfCopies(libraryItemDTO.numOfCopies());
+            List<Copy> copies = new ArrayList<>();
+            for (int i = 1; i <= libraryItemDTO.numOfCopies(); i++) {
+                copies.add(new Copy(i));
+            }
+            physicalItem.setCopies(copies);
         }
 
         Author author = new Author();

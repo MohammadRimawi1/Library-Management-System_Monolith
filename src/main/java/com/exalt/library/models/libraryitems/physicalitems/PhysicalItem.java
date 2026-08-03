@@ -2,12 +2,15 @@ package com.exalt.library.models.libraryitems.physicalitems;
 
 import com.exalt.library.models.libraryitems.LibraryItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A class representing the physical item that exists in the library as a physical object
  * @author Mohammad Rimawi
  */
 public class PhysicalItem extends LibraryItem {
-    private int numOfCopies; // Represents how many physical object exists inside the library
+    private List<Copy> copies = new ArrayList<>();
 
     public PhysicalItem() {
         super();
@@ -20,17 +23,25 @@ public class PhysicalItem extends LibraryItem {
      * @return
      */
     public int getNumOfCopies() {
-        return numOfCopies;
+        return copies.size();
+    }
+
+    /**
+     * a method for getting the full list of copies
+     * @return
+     */
+    public List<Copy> getCopies() {
+        return copies;
     }
 //    ==== GETTERS ====
 
 //    ==== SETTERS ====
     /**
-     * a method for setting how many physical items exists in the library
-     * @param numOfCopies
+     * a method for replacing the full list of copies directly
+     * @param copies
      */
-    public void setNumOfCopies(int numOfCopies) {
-        this.numOfCopies = numOfCopies;
+    public void setCopies(List<Copy> copies) {
+        this.copies = copies;
     }
 //    ==== SETTERS ====
 
@@ -41,7 +52,7 @@ public class PhysicalItem extends LibraryItem {
                 ", title='" + getTitle() + '\'' +
                 ", author=" + getAuthor() +
                 ", isAvailable=" + isAvailable() + '\'' +
-                ", Number of Stories= " + numOfCopies +
+                ", Number of Copies= " + getNumOfCopies() +
                 '}';
     }
 }
