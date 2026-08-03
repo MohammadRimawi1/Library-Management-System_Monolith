@@ -33,7 +33,7 @@ com\exalt\library\dto\RegisterDTO.class
 com\exalt\library\models\libraryitems\physicalitems\PhysicalItem.class
 com\exalt\library\security\UserPrincipal.class
 com\exalt\library\repositories\ReservationRepository.class
-com\exalt\library\services\strategies\Reservable.class
+com\exalt\library\aop\LoggingAspect.class
 com\exalt\library\models\reservation\ReservationStatus.class
 com\exalt\library\dto\ReserveDTO.class
 com\exalt\library\exceptions\ReservationNotFoundException.class
@@ -58,6 +58,7 @@ com\exalt\library\exceptions\handler\GlobalExceptionHandler.class
 com\exalt\library\exceptions\ItemNotFoundException.class
 com\exalt\library\services\operations\UserOperations.class
 com\exalt\library\validation\ReserveValidator.class
+com\exalt\library\models\libraryitems\physicalitems\Copy.class
 com\exalt\library\services\BorrowerServices.class
 com\exalt\library\services\LibraryItemServices.class
 com\exalt\library\services\ReservationServices.class

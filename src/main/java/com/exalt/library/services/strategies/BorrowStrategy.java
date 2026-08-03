@@ -25,8 +25,17 @@ public interface BorrowStrategy {
     Reservation borrow(Reservation reservation);
 
     /**
-     * a method for returning the item
-     * @param libraryItem
+     * a method for returning the item - needs the full reservation (not just the item)
+     * since it must know which specific copy to mark available again
+     * @param reservation
      */
-    void returnItem(LibraryItem libraryItem);
+    void returnItem(Reservation reservation);
+
+    /**
+     * a method for checking whether a specific copy is currently available
+     * @param item
+     * @param copyNumber
+     * @return
+     */
+    boolean isCopyAvailable(LibraryItem item, int copyNumber);
 }

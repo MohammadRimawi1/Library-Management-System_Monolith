@@ -5,6 +5,10 @@ package com.exalt.library.dto;
  * @param type the type of the library item
  * @param title the title of the library item
  * @param numOfCopies the number of copies (only for physical items)
+ * @param description the description of the library item
+ * @param language the language of the library item
+ * @param version the version of the library item
+ * @param image the image of the library item
  * @param author the author information
  * @author Mohammad Rimawi
  */
@@ -14,5 +18,7 @@ public record LibraryItemDTO(
         Integer numOfCopies,
         String description,
         String language,
+        String version,
+        String image,
         AuthorDTO author
 ) {}

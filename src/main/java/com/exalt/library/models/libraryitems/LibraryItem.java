@@ -19,6 +19,8 @@ public abstract class LibraryItem {
     private boolean isAvailable; // Defines if the book is available or not
     private String description; // Defines the description of a book
     private String language; // Defines the language of the book
+    private String version; // Defines the edition/version of this item
+    private String image; // Defines a URL/path pointing at the item's cover image
 
     /**
      * A Default constructor
@@ -77,6 +79,22 @@ public abstract class LibraryItem {
     public String getLanguage() {
         return language;
     }
+
+    /**
+     * a method for getting the version/edition of this item
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * a method for getting the cover image URL/path
+     * @return the image
+     */
+    public String getImage() {
+        return image;
+    }
     //    ==== GETTERS ====
 
 //    ==== SETTERS ====
@@ -118,6 +136,22 @@ public abstract class LibraryItem {
      */
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    /**
+     * a method for setting the version/edition of this item
+     * @param version
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
+     * a method for setting the cover image URL/path
+     * @param image
+     */
+    public void setImage(String image) {
+        this.image = image;
     }
     //    ==== SETTERS ====
 }

@@ -37,10 +37,15 @@ public class OnlineBorrowStrategyService implements BorrowStrategy {
 
     /**
      * a method for returning an item
-     * @param libraryItem
+     * @param reservation
      */
     @Override
-    public void returnItem(LibraryItem libraryItem) {
+    public void returnItem(Reservation reservation) {
         // Always available
+    }
+
+    @Override
+    public boolean isCopyAvailable(LibraryItem item, int copyNumber) {
+        return true; // online items are always available - copies don't apply here
     }
 }

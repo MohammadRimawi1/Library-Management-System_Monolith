@@ -1,10 +1,12 @@
 package com.exalt.library.services.borrowtype;
 
+import com.exalt.library.exceptions.ItemNotFoundException;
+import com.exalt.library.exceptions.ItemUnavailableException;
+import com.exalt.library.models.libraryitems.physicalitems.Copy;
 import com.exalt.library.models.reservation.Reservation;
 import com.exalt.library.models.reservation.ReservationStatus;
 import com.exalt.library.repositories.LibraryItemRepository;
 import com.exalt.library.services.strategies.BorrowStrategy;
-import com.exalt.library.services.strategies.Reservable;
 import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.models.libraryitems.physicalitems.PhysicalItem;
 import org.springframework.stereotype.Component;
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Component;
  * @author Mohammad Rimawi
  */
 @Component
-public class InHandBorrowStrategyService implements BorrowStrategy, Reservable {
+public class InHandBorrowStrategyService implements BorrowStrategy {
     private final LibraryItemRepository libraryItemRepository; // Defines the library item repository
 
     /**
@@ -27,24 +29,6 @@ public class InHandBorrowStrategyService implements BorrowStrategy, Reservable {
     }
 
     /**
-     * a method for reducing the available copies of a physical item by one,
-     * and flipping availability off once none remain.
-     * @param libraryItem
-     */
-    private void decrementCopy(LibraryItem libraryItem) {
-        PhysicalItem physicalItem = (PhysicalItem) libraryItem;
-        int remaining = physicalItem.getNumOfCopies() - 1;
-        if (remaining < 0) {
-            throw new IllegalStateException("No copies left to borrow");
-        }
-        physicalItem.setNumOfCopies(remaining);
-        if (remaining == 0) {
-            physicalItem.setAvailable(false);
-        }
-        libraryItemRepository.save(physicalItem);
-    }
-
-    /**
      * a method for activating an existing reservation - marks it active
      * and decrements the physical copy count
      * @param reservation
@@ -52,17 +36,20 @@ public class InHandBorrowStrategyService implements BorrowStrategy, Reservable {
      */
     @Override
     public Reservation activate(Reservation reservation) {
-        LibraryItem item = reservation.getLibraryItem();
+        PhysicalItem physicalItem = (PhysicalItem) reservation.getLibraryItem();
+        Copy copy = findCopy(physicalItem, reservation.getCopyNumber());
 
-        if (item.isAvailable()) {
-            decrementCopy(item);
+        if (!copy.isAvailable()) {
+            throw new ItemUnavailableException("Copy #" + reservation.getCopyNumber() + " is not available");
         }
 
-        reservation.setStatus(ReservationStatus.ACTIVE);
+        copy.setAvailable(false);
+        physicalItem.setAvailable(hasAnyAvailableCopy(physicalItem));
+        libraryItemRepository.save(physicalItem);
 
+        reservation.setStatus(ReservationStatus.ACTIVE);
         return reservation;
     }
-
 
     /**
      * The borrowing strategy for a type of borrowing
@@ -76,21 +63,50 @@ public class InHandBorrowStrategyService implements BorrowStrategy, Reservable {
 
     /**
      * a method for returning the item
-     * @param libraryItem
+     * @param reservation
      */
     @Override
-    public void returnItem(LibraryItem libraryItem) {
-        PhysicalItem physicalItem = (PhysicalItem) libraryItem;
-        physicalItem.setNumOfCopies(physicalItem.getNumOfCopies() + 1);
+    public void returnItem(Reservation reservation) {
+        PhysicalItem physicalItem = (PhysicalItem) reservation.getLibraryItem();
+        Copy copy = findCopy(physicalItem, reservation.getCopyNumber());
+
+        copy.setAvailable(true);
         physicalItem.setAvailable(true);
+        libraryItemRepository.save(physicalItem);
     }
 
     /**
-     * a method for holding a specific item and decrementing the num of copies for it
+     * a method for checking whether a specific copy is currently available
      * @param item
+     * @param copyNumber
+     * @return
      */
     @Override
-    public void holdItem(LibraryItem item) {
-        decrementCopy(item);
+    public boolean isCopyAvailable(LibraryItem item, int copyNumber) {
+        PhysicalItem physicalItem = (PhysicalItem) item;
+        return findCopy(physicalItem, copyNumber).isAvailable();
+    }
+
+    /**
+     * finds a specific copy on a physical item by its number
+     * @param physicalItem
+     * @param copyNumber
+     * @return the matching copy
+     * @throws ItemNotFoundException if no copy with that number exists
+     */
+    private Copy findCopy(PhysicalItem physicalItem, int copyNumber) {
+        return physicalItem.getCopies().stream()
+                .filter(copy -> copy.getCopyNumber() == copyNumber)
+                .findFirst()
+                .orElseThrow(() -> new ItemNotFoundException("Copy #" + copyNumber + " does not exist for this item"));
+    }
+
+    /**
+     * a method for checking if there is any available copy
+     * @param physicalItem
+     * @return
+     */
+    private boolean hasAnyAvailableCopy(PhysicalItem physicalItem) {
+        return physicalItem.getCopies().stream().anyMatch(Copy::isAvailable);
     }
 }
