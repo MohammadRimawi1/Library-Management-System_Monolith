@@ -21,4 +21,26 @@ public record LibraryItemDTO(
         String version,
         String image,
         AuthorDTO author
-) {}
+) {
+    /**
+     * compact constructor - trims title and description automatically instead of
+     * rejecting values with leading/trailing whitespace
+     */
+    public LibraryItemDTO {
+        if (title != null) {
+            title = title.trim();
+        }
+        if (description != null) {
+            description = description.trim();
+        }
+        if (language != null) {
+            language = language.trim();
+        }
+        if (version != null) {
+            version = version.trim();
+        }
+        if (image != null) {
+            image = image.trim();
+        }
+    }
+}

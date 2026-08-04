@@ -13,4 +13,17 @@ public record AuthorDTO(
         String name,
         String nationality,
         LocalDate birthDate
-) {}
+) {
+    /**
+     * compact constructor - trims name and nationality automatically instead of
+     * rejecting values with leading/trailing whitespace
+     */
+    public AuthorDTO {
+        if (name != null) {
+            name = name.trim();
+        }
+        if (nationality != null) {
+            nationality = nationality.trim();
+        }
+    }
+}

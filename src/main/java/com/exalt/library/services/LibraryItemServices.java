@@ -1,7 +1,8 @@
 package com.exalt.library.services;
 
 import com.exalt.library.dto.LibraryItemDTO;
-import com.exalt.library.exceptions.ItemNotFoundException;
+import com.exalt.library.exceptions.ConflictException;
+import com.exalt.library.exceptions.notfound.ItemNotFoundException;
 import com.exalt.library.models.Author;
 import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.models.libraryitems.onlineitems.OnlineItem;
@@ -236,7 +237,7 @@ public class LibraryItemServices implements LibraryItemOperations {
                     .anyMatch(existing -> existing.getClass().equals(item.getClass()));
 
             if (duplicateExists) {
-                throw new IllegalArgumentException("An online item with this title, version, and author already exists");
+                throw new ConflictException("An online item with this title, version, and author already exists");
             }
         }
     }

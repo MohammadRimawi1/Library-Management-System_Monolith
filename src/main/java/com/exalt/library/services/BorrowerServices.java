@@ -1,6 +1,6 @@
 package com.exalt.library.services;
 
-import com.exalt.library.exceptions.BorrowerNotFoundException;
+import com.exalt.library.exceptions.notfound.BorrowerNotFoundException;
 import com.exalt.library.models.users.Borrower;
 import com.exalt.library.repositories.BorrowerRepository;
 import com.exalt.library.services.operations.BorrowerOperations;

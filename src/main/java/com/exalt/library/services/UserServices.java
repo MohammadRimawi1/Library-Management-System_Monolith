@@ -2,7 +2,9 @@ package com.exalt.library.services;
 
 import com.exalt.library.dto.LoginDTO;
 import com.exalt.library.dto.RegisterDTO;
-import com.exalt.library.exceptions.UserNotFoundException;
+import com.exalt.library.exceptions.AuthenticationFailedException;
+import com.exalt.library.exceptions.ConflictException;
+import com.exalt.library.exceptions.notfound.UserNotFoundException;
 import com.exalt.library.models.users.Borrower;
 import com.exalt.library.models.users.Role;
 import com.exalt.library.models.users.User;
@@ -67,7 +69,7 @@ public class UserServices implements UserOperations {
         RegisterValidator.validate(registerDTO, role);
 
         if (userExists(registerDTO.email())) {
-            throw new IllegalArgumentException("A user with this email already exists");
+            throw new ConflictException("A user with this email already exists");
         }
 
         User user = new User();
@@ -121,7 +123,7 @@ public class UserServices implements UserOperations {
                     new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password())
             );
         } catch (AuthenticationException e) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new AuthenticationFailedException("Invalid email or password");
         }
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();

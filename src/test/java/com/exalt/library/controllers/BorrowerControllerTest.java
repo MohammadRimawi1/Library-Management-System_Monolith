@@ -1,6 +1,6 @@
 //package com.exalt.library.controllers;
 //
-//import com.exalt.library.exceptions.BorrowerNotFoundException;
+//import com.exalt.library.exceptions.notfound.BorrowerNotFoundException;
 //import com.exalt.library.exceptions.handler.GlobalExceptionHandler;
 //import com.exalt.library.models.users.Borrower;
 //import com.exalt.library.services.BorrowerServices;

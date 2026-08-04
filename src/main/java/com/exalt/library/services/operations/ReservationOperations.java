@@ -1,9 +1,9 @@
 package com.exalt.library.services.operations;
 
 import com.exalt.library.models.users.Borrower;
-import com.exalt.library.exceptions.BorrowerNotFoundException;
-import com.exalt.library.exceptions.ItemNotFoundException;
-import com.exalt.library.exceptions.ReservationNotFoundException;
+import com.exalt.library.exceptions.notfound.BorrowerNotFoundException;
+import com.exalt.library.exceptions.notfound.ItemNotFoundException;
+import com.exalt.library.exceptions.notfound.ReservationNotFoundException;
 import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.models.reservation.Reservation;
 
