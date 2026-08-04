@@ -2,6 +2,7 @@ package com.exalt.library.models.libraryitems;
 
 import com.exalt.library.models.Author;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -19,8 +20,11 @@ public abstract class LibraryItem {
     private boolean isAvailable; // Defines if the book is available or not
     private String description; // Defines the description of a book
     private String language; // Defines the language of the book
-    private String version; // Defines the edition/version of this item
+    private String edition; // Defines the edition/version of this item
     private String image; // Defines a URL/path pointing at the item's cover image
+
+    @Version
+    private Long version; // used by Spring Data for optimistic locking, NOT the edition field above
 
     /**
      * A Default constructor
@@ -84,8 +88,8 @@ public abstract class LibraryItem {
      * a method for getting the version/edition of this item
      * @return the version
      */
-    public String getVersion() {
-        return version;
+    public String getEdition() {
+        return edition;
     }
 
     /**
@@ -140,10 +144,10 @@ public abstract class LibraryItem {
 
     /**
      * a method for setting the version/edition of this item
-     * @param version
+     * @param edition
      */
-    public void setVersion(String version) {
-        this.version = version;
+    public void setEdition(String edition) {
+        this.edition = edition;
     }
 
     /**

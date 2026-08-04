@@ -6,7 +6,11 @@ import com.exalt.library.exceptions.notfound.ItemNotFoundException;
 import com.exalt.library.exceptions.notfound.ReservationNotFoundException;
 import com.exalt.library.exceptions.notfound.UserNotFoundException;
 import com.exalt.library.util.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -112,5 +116,71 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException e) {
         return ResponseEntity.status(403).body(ApiResponse.error(403, "Forbidden", e.getMessage()));
+    }
+
+    /**
+     * catches a lost-update race - two requests tried to modify the same document at once,
+     * and this one lost
+     * 409 status
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> handleOptimisticLock(OptimisticLockingFailureException e) {
+        return ResponseEntity.status(409).body(ApiResponse.error(409, "Conflict",
+                "This copy was just taken by someone else — please try again"));
+    }
+
+    /**
+     * catches a database-level unique-index violation - this is the safety net for when two
+     * concurrent requests both pass the app-level duplicate check before either one saves
+     * 409 status
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateKey(DuplicateKeyException e) {
+        return ResponseEntity.status(409).body(ApiResponse.error(409, "Conflict",
+                "A record with this value already exists"));
+    }
+
+    /**
+     * catches malformed/unparseable JSON request bodies - e.g. broken syntax, or a field
+     * that can't be coerced into the expected type (bad date format, wrong type, etc.)
+     * 400 status
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleMalformedJson(HttpMessageNotReadableException e) {
+        return ResponseEntity.status(400).body(ApiResponse.error(400, "Bad Request",
+                "The request body is malformed or contains an invalid value"));
+    }
+
+    /**
+     * catches database-level integrity/schema violations (e.g. a $jsonSchema rejection).
+     * intentionally hides the raw MongoDB error details from the client - those are
+     * internal database structure, not something a client should see - but this is still
+     * a real server-side bug, so it stays a 500
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        return ResponseEntity.status(500).body(ApiResponse.error(500, "Internal Server Error",
+                "A database error occurred while processing your request"));
+    }
+
+    /**
+     * catches an internal type-mismatch bug - a strategy was resolved against the wrong
+     * item type. Shouldn't happen given BorrowStrategyFactory's instanceof check, but this
+     * is a defensive net so it fails as a clean 500 instead of a raw cast-exception message
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(ClassCastException.class)
+    public ResponseEntity<Map<String, Object>> handleClassCastException(ClassCastException e) {
+        return ResponseEntity.status(500).body(ApiResponse.error(500, "Internal Server Error",
+                "An unexpected internal error occurred"));
     }
 }

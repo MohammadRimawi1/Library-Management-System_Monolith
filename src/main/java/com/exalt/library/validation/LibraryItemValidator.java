@@ -44,8 +44,8 @@ public class LibraryItemValidator {
             throw new IllegalArgumentException("Language must be between 2 and 50 characters");
         }
 
-        if (libraryItemDTO.version() != null && !Validator.size(libraryItemDTO.version(), 1, 50)) {
-            throw new IllegalArgumentException("Version must be between 1 and 50 characters");
+        if (libraryItemDTO.edition() != null && !Validator.size(libraryItemDTO.edition(), 1, 50)) {
+            throw new IllegalArgumentException("Edition must be between 1 and 50 characters");
         }
 
         if (libraryItemDTO.image() != null && !Validator.size(libraryItemDTO.image(), 0, 700)) {

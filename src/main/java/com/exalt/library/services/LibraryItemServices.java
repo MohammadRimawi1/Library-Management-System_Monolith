@@ -69,7 +69,7 @@ public class LibraryItemServices implements LibraryItemOperations {
         item.setTitle(libraryItemDTO.title());
         item.setDescription(libraryItemDTO.description());
         item.setLanguage(libraryItemDTO.language());
-        item.setVersion(libraryItemDTO.version());
+        item.setEdition(libraryItemDTO.edition());
         item.setImage(libraryItemDTO.image());
 
         Author author = new Author();
@@ -162,8 +162,8 @@ public class LibraryItemServices implements LibraryItemOperations {
      */
     private Optional<PhysicalItem> handlePhysicalItemCopies(LibraryItemDTO libraryItemDTO, PhysicalItem physicalItem) {
         var existingPhysicalItem = libraryItemRepository
-                .findByTitleIgnoreCaseAndVersionIgnoreCaseAndAuthor_NameIgnoreCase(
-                        libraryItemDTO.title(), libraryItemDTO.version(), libraryItemDTO.author().name())
+                .findByTitleIgnoreCaseAndEditionIgnoreCaseAndAuthor_NameIgnoreCase(
+                        libraryItemDTO.title(), libraryItemDTO.edition(), libraryItemDTO.author().name())
                 .stream()
                 .filter(PhysicalItem.class::isInstance)
                 .map(PhysicalItem.class::cast)
@@ -230,14 +230,14 @@ public class LibraryItemServices implements LibraryItemOperations {
     private void validateOnlineItemUniqueness(LibraryItemDTO libraryItemDTO, LibraryItem item) {
         if (item instanceof OnlineItem) {
             List<LibraryItem> matches = libraryItemRepository
-                    .findByTitleIgnoreCaseAndVersionIgnoreCaseAndAuthor_NameIgnoreCase(
-                            libraryItemDTO.title(), libraryItemDTO.version(), libraryItemDTO.author().name());
+                    .findByTitleIgnoreCaseAndEditionIgnoreCaseAndAuthor_NameIgnoreCase(
+                            libraryItemDTO.title(), libraryItemDTO.edition(), libraryItemDTO.author().name());
 
             boolean duplicateExists = matches.stream()
                     .anyMatch(existing -> existing.getClass().equals(item.getClass()));
 
             if (duplicateExists) {
-                throw new ConflictException("An online item with this title, version, and author already exists");
+                throw new ConflictException("An online item with this title, edition, and author already exists");
             }
         }
     }
