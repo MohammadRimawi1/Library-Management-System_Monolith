@@ -1,20 +1,22 @@
 package com.exalt.library.services;
 
 import com.exalt.library.dto.LibraryItemDTO;
+import com.exalt.library.exceptions.ItemNotFoundException;
 import com.exalt.library.models.Author;
+import com.exalt.library.models.libraryitems.LibraryItem;
+import com.exalt.library.models.libraryitems.onlineitems.OnlineItem;
 import com.exalt.library.models.libraryitems.physicalitems.Copy;
 import com.exalt.library.models.libraryitems.physicalitems.PhysicalItem;
 import com.exalt.library.repositories.LibraryItemRepository;
 import com.exalt.library.services.factory.LibraryItemFactory;
 import com.exalt.library.services.operations.LibraryItemOperations;
-import com.exalt.library.exceptions.ItemNotFoundException;
-import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.validation.LibraryItemValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class LibraryItemServices implements LibraryItemOperations {
 
     private final LibraryItemRepository libraryItemRepository; // Defines the libraryItems repository
+
     /**
      * Constructor injection
      */
@@ -45,26 +48,28 @@ public class LibraryItemServices implements LibraryItemOperations {
     /**
      * a method for creating a library item from a validated request
      * @param libraryItemDTO
-     * @return the created item
+     * @return the created item or the updated physical item with new copies
      */
     @Override
     public LibraryItem createItem(LibraryItemDTO libraryItemDTO) {
         LibraryItemValidator.validate(libraryItemDTO);
 
         LibraryItem item = LibraryItemFactory.create(libraryItemDTO.type());
+
+        validateOnlineItemUniqueness(libraryItemDTO, item);
+
+        if (item instanceof PhysicalItem physicalItem) {
+            Optional<PhysicalItem> existingUpdatedItem = handlePhysicalItemCopies(libraryItemDTO, physicalItem);
+            if (existingUpdatedItem.isPresent()) {
+                return existingUpdatedItem.get();
+            }
+        }
+
         item.setTitle(libraryItemDTO.title());
         item.setDescription(libraryItemDTO.description());
         item.setLanguage(libraryItemDTO.language());
-        item.setLanguage(libraryItemDTO.version());
-        item.setLanguage(libraryItemDTO.image());
-
-        if (item instanceof PhysicalItem physicalItem && libraryItemDTO.numOfCopies() != null) {
-            List<Copy> copies = new ArrayList<>();
-            for (int i = 1; i <= libraryItemDTO.numOfCopies(); i++) {
-                copies.add(new Copy(i));
-            }
-            physicalItem.setCopies(copies);
-        }
+        item.setVersion(libraryItemDTO.version());
+        item.setImage(libraryItemDTO.image());
 
         Author author = new Author();
         author.setName(libraryItemDTO.author().name());
@@ -146,5 +151,93 @@ public class LibraryItemServices implements LibraryItemOperations {
     @Override
     public int getItemCount() {
         return (int) libraryItemRepository.count();
+    }
+
+    /**
+     * a method for handling physical item copies creation or updating existing physical items
+     * @param libraryItemDTO
+     * @param physicalItem
+     * @return an optional containing the existing physical item if updated, otherwise empty
+     */
+    private Optional<PhysicalItem> handlePhysicalItemCopies(LibraryItemDTO libraryItemDTO, PhysicalItem physicalItem) {
+        var existingPhysicalItem = libraryItemRepository
+                .findByTitleIgnoreCaseAndVersionIgnoreCaseAndAuthor_NameIgnoreCase(
+                        libraryItemDTO.title(), libraryItemDTO.version(), libraryItemDTO.author().name())
+                .stream()
+                .filter(PhysicalItem.class::isInstance)
+                .map(PhysicalItem.class::cast)
+                .findFirst();
+
+        if (existingPhysicalItem.isPresent()) {
+            PhysicalItem existingBook = existingPhysicalItem.get();
+            addCopiesToExistingBook(existingBook, libraryItemDTO.numOfCopies());
+            return Optional.of(libraryItemRepository.save(existingBook));
+        }
+
+        initializePhysicalCopies(libraryItemDTO, physicalItem);
+        return Optional.empty();
+    }
+
+    /**
+     * a method for appending new physical copies to an existing physical item sequentially
+     * @param existingBook
+     * @param copiesToAdd
+     */
+    private void addCopiesToExistingBook(PhysicalItem existingBook, Integer copiesToAdd) {
+        if (copiesToAdd == null || copiesToAdd <= 0) {
+            return;
+        }
+
+        List<Copy> currentCopies = existingBook.getCopies();
+        if (currentCopies == null) {
+            currentCopies = new ArrayList<>();
+        }
+
+        int startCopyNumber = currentCopies.stream()
+                .mapToInt(Copy::getCopyNumber)
+                .max()
+                .orElse(0) + 1;
+
+        for (int i = 0; i < copiesToAdd; i++) {
+            currentCopies.add(new Copy(startCopyNumber + i));
+        }
+
+        existingBook.setCopies(currentCopies);
+    }
+
+    /**
+     * a method for initializing physical copies if the item is a PhysicalItem
+     * @param libraryItemDTO
+     * @param item
+     */
+    private void initializePhysicalCopies(LibraryItemDTO libraryItemDTO, LibraryItem item) {
+        if (item instanceof PhysicalItem physicalItem && libraryItemDTO.numOfCopies() != null) {
+            List<Copy> copies = new ArrayList<>();
+            for (int i = 1; i <= libraryItemDTO.numOfCopies(); i++) {
+                copies.add(new Copy(i));
+            }
+            physicalItem.setCopies(copies);
+        }
+    }
+
+    /**
+     * a method for checking duplicate online items before creation
+     * @param libraryItemDTO
+     * @param item
+     * @throws IllegalArgumentException if a matching online item already exists
+     */
+    private void validateOnlineItemUniqueness(LibraryItemDTO libraryItemDTO, LibraryItem item) {
+        if (item instanceof OnlineItem) {
+            List<LibraryItem> matches = libraryItemRepository
+                    .findByTitleIgnoreCaseAndVersionIgnoreCaseAndAuthor_NameIgnoreCase(
+                            libraryItemDTO.title(), libraryItemDTO.version(), libraryItemDTO.author().name());
+
+            boolean duplicateExists = matches.stream()
+                    .anyMatch(existing -> existing.getClass().equals(item.getClass()));
+
+            if (duplicateExists) {
+                throw new IllegalArgumentException("An online item with this title, version, and author already exists");
+            }
+        }
     }
 }

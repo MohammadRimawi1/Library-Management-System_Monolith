@@ -29,7 +29,7 @@ public class Reservation {
     private Date availableFrom; // Defines if the item is available so we can count the time of the reservation
     private Date endDate; // Defines when the reservation date ends
     private ReservationStatus status; // Defines the status of the reservation
-    private Integer copyNumber; // which specific physical copy this reservation is bound to
+    private String copyId; // which specific physical copy this reservation is bound to
 
     /**
      * A default constructor
@@ -100,8 +100,8 @@ public class Reservation {
      * a method for getting the copy number for the reservation
      * @return
      */
-    public Integer getCopyNumber() {
-        return copyNumber;
+    public String getCopyId() {
+        return copyId;
     }
 
     //    ==== GETTERS ====
@@ -151,10 +151,10 @@ public class Reservation {
 
     /**
      * a method for setting the copy number for the reservation
-     * @param copyNumber
+     * @param copyId
      */
-    public void setCopyNumber(Integer copyNumber) {
-        this.copyNumber = copyNumber;
+    public void setCopyId(String copyId) {
+        this.copyId = copyId;
     }
 
     //    ==== SETTERS ====

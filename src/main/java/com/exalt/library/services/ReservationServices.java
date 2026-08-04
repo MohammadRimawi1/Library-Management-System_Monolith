@@ -1,5 +1,6 @@
 package com.exalt.library.services;
 
+import com.exalt.library.dto.ReserveDTO;
 import com.exalt.library.repositories.ReservationRepository;
 import com.exalt.library.services.operations.BorrowerOperations;
 import com.exalt.library.services.operations.LibraryItemOperations;
@@ -75,19 +76,18 @@ public class ReservationServices implements ReservationOperations {
      * Finds an active reservation matching the borrower, the item, and the specific copy
      * @param borrowerId
      * @param itemId
-     * @param copyNumber
+     * @param copyId
      * @return the active reservation
      * @throws ReservationNotFoundException if it doesn't exist
      */
     @Override
-    public Reservation findActiveReservation(String borrowerId, String itemId, int copyNumber) {
+    public Reservation findActiveReservation(String borrowerId, String itemId, String copyId) {
         List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
                 .filter(reservation -> reservation.getStatus() == ReservationStatus.ACTIVE &&
                         reservation.getBorrower().getId().equals(borrowerId) &&
                         reservation.getLibraryItem().getId().equals(itemId) &&
-                        reservation.getCopyNumber() != null &&
-                        reservation.getCopyNumber() == copyNumber)
+                        copyId.equals(reservation.getCopyId()))
                 .findFirst()
                 .orElseThrow(() -> new ReservationNotFoundException("Active reservation doesn't exist"));
     }
@@ -118,11 +118,11 @@ public class ReservationServices implements ReservationOperations {
      * if not, the reservation is queued as PENDING until that same copy comes back
      * @param borrowerId
      * @param itemId
-     * @param copyNumber
+     * @param copyId
      * @return the created reservation
      */
     @Override
-    public Reservation reserve(String borrowerId, String itemId, int copyNumber) {
+    public Reservation reserve(String borrowerId, String itemId, String copyId) {
         LibraryItem item = checkForLibraryItem(itemId);
         Borrower borrower = checkForBorrower(borrowerId);
 
@@ -136,9 +136,9 @@ public class ReservationServices implements ReservationOperations {
         reservation.setLibraryItem(item);
         reservation.setBorrower(borrower);
         reservation.setStartDate(new Date());
-        reservation.setCopyNumber(copyNumber);
+        reservation.setCopyId(copyId);
 
-        if (strategy.isCopyAvailable(item, copyNumber)) {
+        if (strategy.isCopyAvailable(item, copyId)) {
             strategy.activate(reservation);
             reservation.setDueDate(new Date());
         }
@@ -150,16 +150,15 @@ public class ReservationServices implements ReservationOperations {
     /**
      * a method for checking the next pending reservation for a specific copy of an item
      * @param item
-     * @param copyNumber
+     * @param copyId
      * @return
      */
     @Override
-    public Reservation findNextWaitingReservation(LibraryItem item, int copyNumber) {
+    public Reservation findNextWaitingReservation(LibraryItem item, String copyId) {
         List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
                 .filter(reservation -> reservation.getLibraryItem().getId().equals(item.getId()) &&
-                        reservation.getCopyNumber() != null &&
-                        reservation.getCopyNumber() == copyNumber &&
+                        copyId.equals(reservation.getCopyId()) &&
                         reservation.getStatus() == ReservationStatus.PENDING)
                 .min(Comparator.comparing(Reservation::getStartDate))
                 .orElseThrow(() -> new ReservationNotFoundException("No pending reservation for this copy"));
@@ -192,7 +191,7 @@ public class ReservationServices implements ReservationOperations {
         borrowStrategyFactory.resolve(libraryItem).returnItem(reservation);
         reservationRepository.save(reservation);
 
-        Reservation next = findNextWaitingReservationOrNull(libraryItem, reservation.getCopyNumber());
+        Reservation next = findNextWaitingReservationOrNull(libraryItem, reservation.getCopyId());
         if (next != null) {
             BorrowStrategy strategy = borrowStrategyFactory.resolve(libraryItem);
             strategy.activate(next);
@@ -205,16 +204,16 @@ public class ReservationServices implements ReservationOperations {
      * a method which returns a specific borrowed copy and closes its active reservation
      * @param borrowerId
      * @param itemId
-     * @param copyNumber
+     * @param copyId
      * @return true if the reservation was closed
      * @throws ReservationNotFoundException if no active reservation is found
      */
     @Override
-    public boolean returnItem(String borrowerId, String itemId, int copyNumber) {
+    public boolean returnItem(String borrowerId, String itemId, String copyId) {
         LibraryItem libraryItem = checkForLibraryItem(itemId);
         Borrower borrower = checkForBorrower(borrowerId);
 
-        Reservation reservation = findActiveReservation(borrower.getId(), libraryItem.getId(), copyNumber);
+        Reservation reservation = findActiveReservation(borrower.getId(), libraryItem.getId(), copyId);
         closeReservation(reservation, libraryItem);
 
         return true;
@@ -234,10 +233,10 @@ public class ReservationServices implements ReservationOperations {
      * helper so findNextWaitingReservation's throwing behavior doesn't blow up closeReservation
      * when there's simply nobody waiting for that specific copy
      */
-    private Reservation findNextWaitingReservationOrNull(LibraryItem item, Integer copyNumber) {
-        if (copyNumber == null) return null;
+    private Reservation findNextWaitingReservationOrNull(LibraryItem item, String copyId) {
+        if (copyId == null) return null;
         try {
-            return findNextWaitingReservation(item, copyNumber);
+            return findNextWaitingReservation(item, copyId);
         } catch (ReservationNotFoundException e) {
             return null;
         }

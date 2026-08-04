@@ -35,11 +35,11 @@ public interface ReservationOperations {
      * implemented inside ReservationServices
      * @param borrowerId
      * @param itemId
-     * @param copyNumber
+     * @param copyId
      * @return the active reservation
      * @throws ReservationNotFoundException if it doesn't exist
      */
-    Reservation findActiveReservation(String borrowerId, String itemId, int copyNumber);
+    Reservation findActiveReservation(String borrowerId, String itemId, String copyId);
 
     /**
      * a method for checking if the item exists
@@ -65,19 +65,19 @@ public interface ReservationOperations {
      * implemented inside ReservationServices
      * @param borrowerId
      * @param itemId
-     * @param copyNumber
+     * @param copyId
      * @return
      */
-    Reservation reserve(String borrowerId, String itemId, int copyNumber);
+    Reservation reserve(String borrowerId, String itemId, String copyId);
 
     /**
      * a method for checking the next pending reservation for a specific copy of an item
      * implemented inside ReservationServices
      * @param item
-     * @param copyNumber
+     * @param copyId
      * @return
      */
-    Reservation findNextWaitingReservation(LibraryItem item, int copyNumber);
+    Reservation findNextWaitingReservation(LibraryItem item, String copyId);
 
     /**
      * a method for handling the expiration of a reservation
@@ -99,11 +99,11 @@ public interface ReservationOperations {
      * implemented inside ReservationServices
      * @param borrowerId
      * @param itemId
-     * @param copyNumber
+     * @param copyId
      * @return true if the reservation was closed
      * @throws ReservationNotFoundException if no active reservation is found
      */
-    boolean returnItem(String borrowerId, String itemId, int copyNumber);
+    boolean returnItem(String borrowerId, String itemId, String copyId);
 
     /**
      * A method for retrieving reservations for a specific borrower

@@ -25,5 +25,9 @@ public class ReserveValidator {
         if(!Validator.isValidObjectId(reserveDTO.itemId())) {
             throw new IllegalArgumentException("ItemId must be valid");
         }
+
+        if (!Validator.notBlank(reserveDTO.copyId())) {
+            throw new IllegalArgumentException("CopyId is required");
+        }
     }
 }
