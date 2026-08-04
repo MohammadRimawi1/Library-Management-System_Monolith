@@ -37,10 +37,10 @@ public class InHandBorrowStrategyService implements BorrowStrategy {
     @Override
     public Reservation activate(Reservation reservation) {
         PhysicalItem physicalItem = (PhysicalItem) reservation.getLibraryItem();
-        Copy copy = findCopy(physicalItem, reservation.getCopyNumber());
+        Copy copy = findCopy(physicalItem, reservation.getCopyId());
 
         if (!copy.isAvailable()) {
-            throw new ItemUnavailableException("Copy #" + reservation.getCopyNumber() + " is not available");
+            throw new ItemUnavailableException("This copy is not available");
         }
 
         copy.setAvailable(false);
@@ -68,7 +68,7 @@ public class InHandBorrowStrategyService implements BorrowStrategy {
     @Override
     public void returnItem(Reservation reservation) {
         PhysicalItem physicalItem = (PhysicalItem) reservation.getLibraryItem();
-        Copy copy = findCopy(physicalItem, reservation.getCopyNumber());
+        Copy copy = findCopy(physicalItem, reservation.getCopyId());
 
         copy.setAvailable(true);
         physicalItem.setAvailable(true);
@@ -78,27 +78,27 @@ public class InHandBorrowStrategyService implements BorrowStrategy {
     /**
      * a method for checking whether a specific copy is currently available
      * @param item
-     * @param copyNumber
+     * @param copyId
      * @return
      */
     @Override
-    public boolean isCopyAvailable(LibraryItem item, int copyNumber) {
+    public boolean isCopyAvailable(LibraryItem item, String copyId) {
         PhysicalItem physicalItem = (PhysicalItem) item;
-        return findCopy(physicalItem, copyNumber).isAvailable();
+        return findCopy(physicalItem, copyId).isAvailable();
     }
 
     /**
      * finds a specific copy on a physical item by its number
      * @param physicalItem
-     * @param copyNumber
+     * @param copyId
      * @return the matching copy
      * @throws ItemNotFoundException if no copy with that number exists
      */
-    private Copy findCopy(PhysicalItem physicalItem, int copyNumber) {
+    private Copy findCopy(PhysicalItem physicalItem, String copyId) {
         return physicalItem.getCopies().stream()
-                .filter(copy -> copy.getCopyNumber() == copyNumber)
+                .filter(copy -> copy.getId().equals(copyId))
                 .findFirst()
-                .orElseThrow(() -> new ItemNotFoundException("Copy #" + copyNumber + " does not exist for this item"));
+                .orElseThrow(() -> new ItemNotFoundException("Copy #" + copyId + " does not exist for this item"));
     }
 
     /**

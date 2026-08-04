@@ -44,6 +44,14 @@ public class LibraryItemValidator {
             throw new IllegalArgumentException("Language must be between 2 and 50 characters");
         }
 
+        if (libraryItemDTO.version() != null && !Validator.size(libraryItemDTO.version(), 1, 50)) {
+            throw new IllegalArgumentException("Version must be between 1 and 50 characters");
+        }
+
+        if (libraryItemDTO.image() != null && !Validator.size(libraryItemDTO.image(), 0, 700)) {
+            throw new IllegalArgumentException("Image path/URL must not exceed 700 characters");
+        }
+
         if(!Validator.notNull(libraryItemDTO.author())) {
             throw new IllegalArgumentException("Author shouldn't be null");
         }

@@ -45,7 +45,7 @@ public class OnlineBorrowStrategyService implements BorrowStrategy {
     }
 
     @Override
-    public boolean isCopyAvailable(LibraryItem item, int copyNumber) {
+    public boolean isCopyAvailable(LibraryItem item, String copyId) {
         return true; // online items are always available - copies don't apply here
     }
 }

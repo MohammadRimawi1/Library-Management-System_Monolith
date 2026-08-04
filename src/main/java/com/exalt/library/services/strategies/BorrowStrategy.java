@@ -34,8 +34,8 @@ public interface BorrowStrategy {
     /**
      * a method for checking whether a specific copy is currently available
      * @param item
-     * @param copyNumber
+     * @param copyId
      * @return
      */
-    boolean isCopyAvailable(LibraryItem item, int copyNumber);
+    boolean isCopyAvailable(LibraryItem item, String copyId);
 }

@@ -67,15 +67,15 @@ public class ReservationController  {
 
     /**
      * a method for fetching active reservations
-     * exists on: /api/reservations/active?borrowerId={id}&itemId={id}&copyNumber={n}
+     * exists on: /api/reservations/active?borrowerId={id}&itemId={id}&copyId={id}
      * @param borrowerId
      * @param itemId
-     * @param copyNumber
+     * @param copyId
      * @return
      */
     @GetMapping("/active")
-    public ResponseEntity<Map<String, Object>> findActive(@RequestParam String borrowerId, @RequestParam String itemId, @RequestParam int copyNumber) {
-        Reservation reservation = reservationServices.findActiveReservation(borrowerId, itemId, copyNumber);
+    public ResponseEntity<Map<String, Object>> findActive(@RequestParam String borrowerId, @RequestParam String itemId, @RequestParam String copyId) {
+        Reservation reservation = reservationServices.findActiveReservation(borrowerId, itemId, copyId);
         return ResponseEntity.ok(ApiResponse.success(200, reservation));
     }
 
@@ -101,7 +101,7 @@ public class ReservationController  {
         ReserveValidator.validate(reserveDTO);
 
         User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
-        Reservation reservation = reservationServices.reserve(currentUser.getBorrower().getId(), reserveDTO.itemId(), reserveDTO.copyNumber());
+        Reservation reservation = reservationServices.reserve(currentUser.getBorrower().getId(), reserveDTO.itemId(), reserveDTO.copyId());
 
         return ResponseEntity.status(201).body(ApiResponse.success(201, reservation));
     }
@@ -117,7 +117,7 @@ public class ReservationController  {
         ReserveValidator.validate(reserveDTO);
 
         User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
-        boolean closed = reservationServices.returnItem(currentUser.getBorrower().getId(), reserveDTO.itemId(), reserveDTO.copyNumber());
+        boolean closed = reservationServices.returnItem(currentUser.getBorrower().getId(), reserveDTO.itemId(), reserveDTO.copyId());
 
         return ResponseEntity.ok(ApiResponse.success(200, Map.of("returned", closed)));
     }
