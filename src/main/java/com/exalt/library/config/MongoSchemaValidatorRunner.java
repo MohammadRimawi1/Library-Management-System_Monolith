@@ -1,9 +1,13 @@
 package com.exalt.library.config;
 
+import com.exalt.library.models.libraryitems.LibraryItem;
+import com.exalt.library.models.users.User;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.Index;
+import org.springframework.data.mongodb.core.query.Collation;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,6 +40,8 @@ public class MongoSchemaValidatorRunner implements CommandLineRunner {
         applyBorrowerValidation();
         applyLibraryItemValidation();
         applyReservationValidation();
+        applyUserIndexes();
+        applyLibraryItemIndexes();
     }
 
     /**
@@ -123,5 +129,29 @@ public class MongoSchemaValidatorRunner implements CommandLineRunner {
                 .append("validationAction", "error");
 
         db.runCommand(command);
+    }
+
+    /**
+     * A method for ensuring a unique index exists on User.email, so the database itself
+     * rejects concurrent duplicate registrations instead of relying only on an app-level check
+     */
+    private void applyUserIndexes() {
+        mongoTemplate.indexOps(User.class)
+                .createIndex(new Index().on("email", org.springframework.data.domain.Sort.Direction.ASC).unique());
+    }
+
+    /**
+     * A method for ensuring a unique compound index on title + edition + author.name,
+     * so the database itself rejects a concurrent duplicate item creation instead of
+     * relying only on the app-level check in LibraryItemServices
+     */
+    private void applyLibraryItemIndexes() {
+        mongoTemplate.indexOps(LibraryItem.class)
+                .createIndex(new Index()
+                        .on("title", org.springframework.data.domain.Sort.Direction.ASC)
+                        .on("edition", org.springframework.data.domain.Sort.Direction.ASC)
+                        .on("author.name", org.springframework.data.domain.Sort.Direction.ASC)
+                        .unique()
+                        .collation(Collation.of("en").strength(Collation.ComparisonLevel.secondary())));
     }
 }

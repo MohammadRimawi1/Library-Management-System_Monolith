@@ -18,7 +18,7 @@ public record LibraryItemDTO(
         Integer numOfCopies,
         String description,
         String language,
-        String version,
+        String edition,
         String image,
         AuthorDTO author
 ) {
@@ -36,8 +36,8 @@ public record LibraryItemDTO(
         if (language != null) {
             language = language.trim();
         }
-        if (version != null) {
-            version = version.trim();
+        if (edition != null) {
+            edition = edition.trim();
         }
         if (image != null) {
             image = image.trim();

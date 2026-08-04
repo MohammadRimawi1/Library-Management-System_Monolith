@@ -15,10 +15,9 @@ public interface LibraryItemRepository extends MongoRepository<LibraryItem, Stri
     /**
      * a method for finding the title, version, and author name.
      * @param title
-     * @param version
+     * @param edition
      * @param authorName
      * @return
      */
-    List<LibraryItem> findByTitleIgnoreCaseAndVersionIgnoreCaseAndAuthor_NameIgnoreCase(
-            String title, String version, String authorName);
+    List<LibraryItem> findByTitleIgnoreCaseAndEditionIgnoreCaseAndAuthor_NameIgnoreCase(String title, String edition, String authorName);
 }

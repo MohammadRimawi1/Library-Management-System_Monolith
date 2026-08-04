@@ -1,6 +1,7 @@
 package com.exalt.library.models.users;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -14,6 +15,7 @@ public class User {
     @Id
     private String id; // Defines the identity number for a user account
 
+    @Indexed(unique = true)
     private String email; // Defines the login identifier for the user
 
     private String password; // Defines the hashed password for the user
