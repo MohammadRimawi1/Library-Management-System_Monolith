@@ -1,6 +1,10 @@
 package com.exalt.library.exceptions.handler;
 
 import com.exalt.library.exceptions.*;
+import com.exalt.library.exceptions.notfound.BorrowerNotFoundException;
+import com.exalt.library.exceptions.notfound.ItemNotFoundException;
+import com.exalt.library.exceptions.notfound.ReservationNotFoundException;
+import com.exalt.library.exceptions.notfound.UserNotFoundException;
 import com.exalt.library.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -8,7 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,14 +34,38 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * catches bad input / invalid state cases (e.g. claiming a non-READY reservation, or an item with no copies left)
+     * catches malformed input / invalid state cases (e.g. missing required fields, an item type that
+     * can't do what was requested)
      * 400 status
      * @param e
      * @return
      */
-    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ItemUnavailableException.class})
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(RuntimeException e) {
         return ResponseEntity.status(400).body(ApiResponse.error(400, "Bad Request", e.getMessage()));
+    }
+
+    /**
+     * catches requests that are well-formed but conflict with the current state of a resource -
+     * e.g. a duplicate entity, or a copy that's already taken
+     * 409 status
+     * @param e
+     * @return
+     */
+    @ExceptionHandler({ConflictException.class, ItemUnavailableException.class})
+    public ResponseEntity<Map<String, Object>> handleConflict(RuntimeException e) {
+        return ResponseEntity.status(409).body(ApiResponse.error(409, "Conflict", e.getMessage()));
+    }
+
+    /**
+     * catches failed login attempts - the server doesn't recognize the credentials given
+     * 401 status
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(AuthenticationFailedException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthenticationFailed(AuthenticationFailedException e) {
+        return ResponseEntity.status(401).body(ApiResponse.error(401, "Unauthorized", e.getMessage()));
     }
 
     /**
@@ -77,7 +104,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * catches access denied errors when a user lacks required authorities or roles
+     * catches requests from an authenticated user who lacks permission for this action
      * 403 status
      * @param e
      * @return
@@ -85,16 +112,5 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException e) {
         return ResponseEntity.status(403).body(ApiResponse.error(403, "Forbidden", e.getMessage()));
-    }
-
-    /**
-     * catches static resource or endpoint path resolution failures
-     * 404 status
-     * @param e
-     * @return
-     */
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNoResourceFound(NoResourceFoundException e) {
-        return ResponseEntity.status(404).body(ApiResponse.error(404, "Not Found", "The requested resource does not exist"));
     }
 }

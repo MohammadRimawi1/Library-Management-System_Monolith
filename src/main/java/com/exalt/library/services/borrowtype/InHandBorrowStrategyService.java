@@ -1,6 +1,6 @@
 package com.exalt.library.services.borrowtype;
 
-import com.exalt.library.exceptions.ItemNotFoundException;
+import com.exalt.library.exceptions.notfound.ItemNotFoundException;
 import com.exalt.library.exceptions.ItemUnavailableException;
 import com.exalt.library.models.libraryitems.physicalitems.Copy;
 import com.exalt.library.models.reservation.Reservation;

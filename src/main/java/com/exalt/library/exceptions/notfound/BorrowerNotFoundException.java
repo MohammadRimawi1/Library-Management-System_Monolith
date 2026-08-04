@@ -1,4 +1,4 @@
-package com.exalt.library.exceptions;
+package com.exalt.library.exceptions.notfound;
 //Fixed
 
 /**

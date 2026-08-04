@@ -1,6 +1,6 @@
 //package com.exalt.library.services;
 //
-//import com.exalt.library.exceptions.ReservationNotFoundException;
+//import com.exalt.library.exceptions.notfound.ReservationNotFoundException;
 //import com.exalt.library.models.libraryitems.LibraryItem;
 //import com.exalt.library.models.libraryitems.physicalitems.PhysicalItem;
 //import com.exalt.library.models.reservation.Reservation;

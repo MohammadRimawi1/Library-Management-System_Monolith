@@ -1,6 +1,7 @@
 package com.exalt.library.exceptions.handler;
 
-import com.exalt.library.exceptions.*;
+import com.exalt.library.exceptions.notfound.ReservationNotFoundException;
+import com.exalt.library.exceptions.notfound.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;

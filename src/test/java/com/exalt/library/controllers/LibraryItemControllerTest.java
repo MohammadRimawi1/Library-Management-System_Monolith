@@ -2,7 +2,7 @@
 //
 //import com.exalt.library.dto.AuthorDTO;
 //import com.exalt.library.dto.LibraryItemDTO;
-//import com.exalt.library.exceptions.ItemNotFoundException;
+//import com.exalt.library.exceptions.notfound.ItemNotFoundException;
 //import com.exalt.library.exceptions.handler.GlobalExceptionHandler;
 //import com.exalt.library.models.libraryitems.physicalitems.BookPhysical;
 //import com.exalt.library.services.LibraryItemServices;

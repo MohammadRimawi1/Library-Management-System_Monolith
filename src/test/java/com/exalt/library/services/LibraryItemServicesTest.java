@@ -2,7 +2,7 @@
 //
 //import com.exalt.library.dto.AuthorDTO;
 //import com.exalt.library.dto.LibraryItemDTO;
-//import com.exalt.library.exceptions.ItemNotFoundException;
+//import com.exalt.library.exceptions.notfound.ItemNotFoundException;
 //import com.exalt.library.models.libraryitems.LibraryItem;
 //import com.exalt.library.repositories.LibraryItemRepository;
 //import org.junit.jupiter.api.Test;
