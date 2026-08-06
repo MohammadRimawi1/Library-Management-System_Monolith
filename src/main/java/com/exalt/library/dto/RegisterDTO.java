@@ -5,12 +5,10 @@ package com.exalt.library.dto;
  * @param name
  * @param email
  * @param password
- * @param registrationKey
  */
 public record RegisterDTO(
         String name,
         String email,
         String password,
-        String phoneNumber,
-        String registrationKey // For librarian
+        String phoneNumber
 ) {}

@@ -8,6 +8,7 @@ com\exalt\library\security\JwtAuthFilter.class
 com\exalt\library\validation\LoginValidator.class
 com\exalt\library\controllers\BorrowerController.class
 com\exalt\library\exceptions\ItemUnavailableException.class
+com\exalt\library\dto\UserDTO.class
 com\exalt\library\models\libraryitems\physicalitems\StoryPhysical.class
 com\exalt\library\models\libraryitems\onlineitems\BookOnline.class
 com\exalt\library\models\users\Borrower.class
@@ -33,6 +34,7 @@ com\exalt\library\validation\RegisterValidator.class
 com\exalt\library\dto\RegisterDTO.class
 com\exalt\library\models\libraryitems\physicalitems\PhysicalItem.class
 com\exalt\library\security\UserPrincipal.class
+com\exalt\library\controllers\AdminController.class
 com\exalt\library\exceptions\notfound\ItemNotFoundException.class
 com\exalt\library\repositories\ReservationRepository.class
 com\exalt\library\aop\LoggingAspect.class

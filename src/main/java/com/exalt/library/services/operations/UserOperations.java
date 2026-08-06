@@ -2,7 +2,10 @@ package com.exalt.library.services.operations;
 
 import com.exalt.library.dto.LoginDTO;
 import com.exalt.library.dto.RegisterDTO;
+import com.exalt.library.models.users.Role;
 import com.exalt.library.models.users.User;
+
+import java.util.List;
 
 /**
  * an interface representing the operations for a user account
@@ -12,8 +15,8 @@ public interface UserOperations {
 
     /**
      * registers a new user
-     * resolves the role first (based on the registration key),
-     * then validates, then creates the User and, if BORROWER, a linked Borrower too
+     * always creates a BORROWER - librarians and the admin are never created through registration
+     * validates, then creates the User and a linked Borrower
      * @param registerDTO
      * @return
      */
@@ -41,4 +44,30 @@ public interface UserOperations {
      * @return
      */
     public String login(LoginDTO loginDTO);
+
+    /**
+     * promotes an existing borrower to librarian
+     * implemented inside UserServices
+     * @param userId
+     * @return the updated user
+     */
+    User promoteToLibrarian(String userId);
+
+    /**
+     * fetches users, optionally filtered by role
+     * implemented inside UserServices
+     * @param role if non-null, restricts results to that role; if null, returns all users
+     * @return
+     */
+    List<User> getUsers(Role role);
+
+    /**
+     * demotes an existing librarian back to borrower
+     * a new Borrower document is created since promotion deletes the old one -
+     * phoneNumber comes back null, there's currently no way to recover it
+     * implemented inside UserServices
+     * @param userId
+     * @return the updated user
+     */
+    User demoteToBorrower(String userId);
 }

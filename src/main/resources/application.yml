@@ -6,7 +6,9 @@ Spring:
     uri: ${MONGO_URI}
 
 library:
-  librarian-registration-key: ${LIBRARIAN_REG_KEY}
+  admin-email: ${ADMIN_EMAIL}
+  admin-password: ${ADMIN_PASSWORD}
+
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: 86400000 # 24 hours
