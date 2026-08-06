@@ -5,6 +5,7 @@ package com.exalt.library.models.users;
  * @author Mohammad Rimawi
  */
 public enum Role {
+    ADMIN,
     LIBRARIAN,
     BORROWER
 }

@@ -1,13 +1,17 @@
 package com.exalt.library.config;
 
 import com.exalt.library.models.libraryitems.LibraryItem;
+import com.exalt.library.models.users.Role;
 import com.exalt.library.models.users.User;
+import com.exalt.library.repositories.UserRepository;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.query.Collation;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,13 +25,23 @@ import java.util.List;
 @Component
 public class MongoSchemaValidatorRunner implements CommandLineRunner {
     private final MongoTemplate mongoTemplate;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${library.admin-email}")
+    private String adminEmail;
+
+    @Value("${library.admin-password}")
+    private String adminPassword;
 
     /**
      * Constructs the runner with the necessary {@link MongoTemplate}.
      * @param mongoTemplate Spring's template for interacting with MongoDB
      */
-    public MongoSchemaValidatorRunner(MongoTemplate mongoTemplate) {
+    public MongoSchemaValidatorRunner(MongoTemplate mongoTemplate, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.mongoTemplate = mongoTemplate;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -42,6 +56,7 @@ public class MongoSchemaValidatorRunner implements CommandLineRunner {
         applyReservationValidation();
         applyUserIndexes();
         applyLibraryItemIndexes();
+        seedAdminAccount();
     }
 
     /**
@@ -153,5 +168,20 @@ public class MongoSchemaValidatorRunner implements CommandLineRunner {
                         .on("author.name", org.springframework.data.domain.Sort.Direction.ASC)
                         .unique()
                         .collation(Collation.of("en").strength(Collation.ComparisonLevel.secondary())));
+    }
+
+    /**
+     * A method for seeding the single admin account at startup, if one doesn't already exist.
+     * Admins are never created through registration - this is the only way one gets created.
+     */
+    private void seedAdminAccount() {
+        boolean adminExists = userRepository.existsByRole(Role.ADMIN);
+        if (!adminExists) {
+            User admin = new User();
+            admin.setEmail(adminEmail);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
+            admin.setRole(Role.ADMIN);
+            userRepository.save(admin);
+        }
     }
 }

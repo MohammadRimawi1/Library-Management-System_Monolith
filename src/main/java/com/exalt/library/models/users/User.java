@@ -18,6 +18,7 @@ public class User {
     @Indexed(unique = true)
     private String email; // Defines the login identifier for the user
 
+    private String name; // Defines the name of the user
     private String password; // Defines the hashed password for the user
 
     private Role role; // Defines the user's role (LIBRARIAN or BORROWER)
@@ -45,6 +46,14 @@ public class User {
      */
     public String getEmail() {
         return email;
+    }
+
+    /**
+     * a method for getting the name
+     * @return
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -80,6 +89,14 @@ public class User {
      */
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    /**
+     * a method for setting the name
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

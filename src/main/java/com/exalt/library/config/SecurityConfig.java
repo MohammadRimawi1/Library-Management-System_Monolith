@@ -57,6 +57,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/library-items").hasRole("LIBRARIAN")
                         .requestMatchers(HttpMethod.GET, "/api/reservations/borrower/{borrowerId}").hasRole("LIBRARIAN")
                         .anyRequest().authenticated()
