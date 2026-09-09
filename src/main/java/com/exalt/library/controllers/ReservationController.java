@@ -44,7 +44,7 @@ public class ReservationController  {
     public ResponseEntity<Map<String, Object>> findAll() {
         User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
 
-        if (currentUser.getRole() == Role.LIBRARIAN) {
+        if (currentUser.getRole() == Role.LIBRARIAN || currentUser.getRole() == Role.ADMIN) {
             return ResponseEntity.ok(ApiResponse.success(200, reservationServices.getAllReservations()));
         }
 
