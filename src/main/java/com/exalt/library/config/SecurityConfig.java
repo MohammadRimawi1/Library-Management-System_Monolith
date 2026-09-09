@@ -64,8 +64,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/library-items").hasRole("LIBRARIAN")
-                        .requestMatchers(HttpMethod.GET, "/api/reservations/borrower/{borrowerId}").hasRole("LIBRARIAN")
+                        .requestMatchers(HttpMethod.POST, "/api/library-items").hasAnyRole("LIBRARIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/borrower/{borrowerId}").hasAnyRole("LIBRARIAN", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
