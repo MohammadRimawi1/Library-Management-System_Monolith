@@ -32,6 +32,14 @@ public interface UserOperations {
     User findByEmail(String email);
 
     /**
+     * finds a user by their id
+     * implemented inside UserServices
+     * @param userId
+     * @return
+     */
+    User findById(String userId);
+
+    /**
      * checks whether a user with the given email already exists
      * implemented inside UserServices
      * @param email
