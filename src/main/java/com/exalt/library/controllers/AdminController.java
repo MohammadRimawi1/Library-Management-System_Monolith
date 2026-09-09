@@ -44,6 +44,18 @@ public class AdminController {
     }
 
     /**
+     * a method for fetching a single user by their user ID
+     * exists on: /api/admin/users/{userId}
+     * @param userId
+     * @return
+     */
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<Map<String, Object>> findUserById(@PathVariable String userId) {
+        User user = userServices.findById(userId);
+        return ResponseEntity.ok(ApiResponse.success(200, UserDTO.from(user)));
+    }
+
+    /**
      * a method for promoting a borrower to librarian
      * exists on: /api/admin/users/{userId}/promote-to-librarian
      * @param userId

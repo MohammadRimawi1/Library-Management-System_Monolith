@@ -97,6 +97,17 @@ public class UserServices implements UserOperations {
     }
 
     /**
+     * finds a user by their id
+     * @param userId
+     * @return
+     */
+    @Override
+    public User findById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
+
+    /**
      * checks whether a user with the given email already exists
      * @param email
      * @return true or false
