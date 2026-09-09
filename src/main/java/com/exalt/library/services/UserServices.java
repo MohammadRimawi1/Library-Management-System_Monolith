@@ -1,6 +1,7 @@
 package com.exalt.library.services;
 
 import com.exalt.library.dto.LoginDTO;
+import com.exalt.library.dto.LoginResult;
 import com.exalt.library.dto.RegisterDTO;
 import com.exalt.library.exceptions.AuthenticationFailedException;
 import com.exalt.library.exceptions.ConflictException;
@@ -110,7 +111,7 @@ public class UserServices implements UserOperations {
      * @param loginDTO
      * @return
      */
-    public String login(LoginDTO loginDTO) {
+    public LoginResult login(LoginDTO loginDTO) {
         LoginValidator.validate(loginDTO);
 
         Authentication authentication;
@@ -123,7 +124,9 @@ public class UserServices implements UserOperations {
         }
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
-        return jwtService.generateToken(principal.getUsername(), principal.getUser().getRole().name());
+        User user = principal.getUser();
+        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
+        return new LoginResult(token, user);
     }
 
     /**

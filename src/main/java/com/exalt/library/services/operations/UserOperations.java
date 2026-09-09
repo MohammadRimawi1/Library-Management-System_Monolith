@@ -1,6 +1,7 @@
 package com.exalt.library.services.operations;
 
 import com.exalt.library.dto.LoginDTO;
+import com.exalt.library.dto.LoginResult;
 import com.exalt.library.dto.RegisterDTO;
 import com.exalt.library.models.users.Role;
 import com.exalt.library.models.users.User;
@@ -43,7 +44,7 @@ public interface UserOperations {
      * @param loginDTO
      * @return
      */
-    public String login(LoginDTO loginDTO);
+    public LoginResult login(LoginDTO loginDTO);
 
     /**
      * promotes an existing borrower to librarian
