@@ -1,5 +1,6 @@
 package com.exalt.library.services;
 
+import com.exalt.library.models.libraryitems.physicalitems.PhysicalItem;
 import com.exalt.library.repositories.ReservationRepository;
 import com.exalt.library.services.operations.BorrowerOperations;
 import com.exalt.library.services.operations.LibraryItemOperations;
@@ -12,6 +13,7 @@ import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.models.libraryitems.onlineitems.OnlineItem;
 import com.exalt.library.models.reservation.Reservation;
 import com.exalt.library.models.reservation.ReservationStatus;
+import com.exalt.library.validation.Validator;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -142,8 +144,8 @@ public class ReservationServices implements ReservationOperations {
         LibraryItem item = checkForLibraryItem(itemId);
         Borrower borrower = checkForBorrower(borrowerId);
 
-        if (item instanceof OnlineItem) {
-            throw new IllegalArgumentException("Online items cannot be reserved — they are always available");
+        if (item instanceof PhysicalItem && !Validator.notBlank(copyId)) {
+            throw new IllegalArgumentException("CopyId is required for physical items");
         }
 
         BorrowStrategy strategy = borrowStrategyFactory.resolve(item);
