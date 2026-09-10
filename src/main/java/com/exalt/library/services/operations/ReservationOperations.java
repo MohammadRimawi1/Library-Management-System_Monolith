@@ -42,6 +42,13 @@ public interface ReservationOperations {
     Reservation findActiveReservation(String borrowerId, String itemId, String copyId);
 
     /**
+     * a method for deleting all reservations belonging to a specific borrower,
+     * releasing any copy they're currently holding back into circulation first
+     * @param borrowerId
+     */
+    void deleteAllForBorrower(String borrowerId);
+
+    /**
      * a method for checking if the item exists
      * implemented inside ReservationServices
      * @param itemId

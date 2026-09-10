@@ -40,6 +40,12 @@ public interface UserOperations {
     User findById(String userId);
 
     /**
+     * a method for deleting a user
+     * @param userId
+     */
+    void deleteUser(String userId);
+
+    /**
      * checks whether a user with the given email already exists
      * implemented inside UserServices
      * @param email
