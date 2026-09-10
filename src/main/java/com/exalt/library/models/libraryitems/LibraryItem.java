@@ -34,6 +34,11 @@ public abstract class LibraryItem {
         this.isAvailable = true;
     }
 
+    /**
+     * a method for getting the type of the item
+     * @return
+     */
+    public abstract String getType();
 
     //    ==== GETTERS ====
     /**

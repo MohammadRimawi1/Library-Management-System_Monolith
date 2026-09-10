@@ -12,6 +12,15 @@ public class BookOnline extends OnlineItem {
         super();
     }
 
+    /**
+     * a method for getting the Book Online Type
+     * @return
+     */
+    @Override
+    public String getType() {
+        return "BookOnline";
+    }
+
     @Override
     public String toString() {
         return "Online Book{" +

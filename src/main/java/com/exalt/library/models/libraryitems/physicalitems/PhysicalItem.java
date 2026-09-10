@@ -16,6 +16,10 @@ public class PhysicalItem extends LibraryItem {
         super();
     }
 
+    public String getType() {
+        return "";
+    }
+
     //    ==== GETTERS ====
 
     /**

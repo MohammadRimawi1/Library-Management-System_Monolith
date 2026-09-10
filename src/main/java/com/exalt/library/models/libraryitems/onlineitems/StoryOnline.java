@@ -12,6 +12,15 @@ public class StoryOnline extends OnlineItem {
         super();
     }
 
+    /**
+     * a method for getting the Story Online Type
+     * @return
+     */
+    @Override
+    public String getType() {
+        return "StoryOnline";
+    }
+
     @Override
     public String toString() {
         return "Online Story {" +
