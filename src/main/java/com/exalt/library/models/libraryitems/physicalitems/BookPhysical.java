@@ -15,6 +15,15 @@ public class BookPhysical extends PhysicalItem {
         super();
     }
 
+    /**
+     * a method for getting the Book Physical type
+     * @return
+     */
+    @Override
+    public String getType() {
+        return "BookPhysical";
+    }
+
     @Override
     public String toString() {
         return "Physical Book{" +

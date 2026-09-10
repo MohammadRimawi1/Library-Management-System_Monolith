@@ -15,6 +15,10 @@ public class OnlineItem extends LibraryItem {
         super();
     }
 
+    public String getType() {
+        return "";
+    }
+
     @Override
     public String toString() {
         return "Online Item {" +

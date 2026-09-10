@@ -14,6 +14,14 @@ public class StoryPhysical extends PhysicalItem {
         super();
     }
 
+    /**
+     * a method for getting the Story Physical Type
+     * @return
+     */
+    @Override
+    public String getType() {
+        return "StoryPhysical";
+    }
 
     @Override
     public String toString() {
