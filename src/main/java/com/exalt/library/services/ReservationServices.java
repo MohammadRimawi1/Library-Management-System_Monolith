@@ -91,6 +91,24 @@ public class ReservationServices implements ReservationOperations {
     }
 
     /**
+     * a method for deleting all reservations belonging to a specific borrower,
+     * releasing any copy they're currently holding back into circulation first
+     * @param borrowerId
+     */
+    @Override
+    public void deleteAllForBorrower(String borrowerId) {
+        List<Reservation> reservations = reservationRepository.findByBorrowerId(borrowerId);
+
+        for (Reservation reservation : reservations) {
+            if (reservation.getStatus() == ReservationStatus.ACTIVE) {
+                closeReservation(reservation, reservation.getLibraryItem());
+            }
+        }
+
+        reservationRepository.deleteAll(reservations);
+    }
+
+    /**
      * a method for checking if the library item exists
      * @param itemId
      * @return a library item if found

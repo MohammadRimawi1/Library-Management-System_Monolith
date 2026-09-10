@@ -78,4 +78,16 @@ public class AdminController {
         User user = userServices.demoteToBorrower(userId);
         return ResponseEntity.ok(ApiResponse.success(200, user));
     }
+
+    /**
+     * a method for permanently deleting a user and all their reservation history
+     * exists on: /api/admin/users/{userId}
+     * @param userId
+     * @return
+     */
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable String userId) {
+        userServices.deleteUser(userId);
+        return ResponseEntity.ok(ApiResponse.success(200, Map.of("deleted", true)));
+    }
 }

@@ -12,6 +12,7 @@ import com.exalt.library.models.users.User;
 import com.exalt.library.repositories.BorrowerRepository;
 import com.exalt.library.repositories.UserRepository;
 import com.exalt.library.security.UserPrincipal;
+import com.exalt.library.services.operations.ReservationOperations;
 import com.exalt.library.services.operations.UserOperations;
 import com.exalt.library.validation.LoginValidator;
 import com.exalt.library.validation.RegisterValidator;
@@ -36,25 +37,30 @@ public class UserServices implements UserOperations {
     private final PasswordEncoder passwordEncoder; // defines the password encoder
     private final JwtService jwtService; // Defines the jwt service
     private final AuthenticationManager authenticationManager; // defines the authenticationManager
+    private final ReservationOperations reservationOperations;
 
     /**
      * constructor injection
      * @param userRepository
      * @param borrowerRepository
      * @param passwordEncoder
+     * @param jwtService
+     * @param authenticationManager
+     * @param reservationOperations
      */
     public UserServices(
             UserRepository userRepository,
             BorrowerRepository borrowerRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            AuthenticationManager authenticationManager
+            AuthenticationManager authenticationManager, ReservationOperations reservationOperations
     ) {
         this.userRepository = userRepository;
         this.borrowerRepository = borrowerRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.reservationOperations = reservationOperations;
     }
 
     /**
@@ -105,6 +111,27 @@ public class UserServices implements UserOperations {
     public User findById(String userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
+
+    /**
+     * a method for deleting a user
+     * @param userId
+     */
+    @Override
+    public void deleteUser(String userId) {
+        User user = findById(userId);
+
+        if (user.getRole() == Role.ADMIN) {
+            throw new ConflictException("The admin account cannot be deleted");
+        }
+
+        if (user.getBorrower() != null) {
+            String borrowerId = user.getBorrower().getId();
+            reservationOperations.deleteAllForBorrower(borrowerId);
+            borrowerRepository.deleteById(borrowerId);
+        }
+
+        userRepository.deleteById(userId);
     }
 
     /**
