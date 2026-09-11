@@ -181,6 +181,7 @@ public class MongoSchemaValidatorRunner implements CommandLineRunner {
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole(Role.ADMIN);
+            admin.setName("Admin");
             userRepository.save(admin);
         }
     }
