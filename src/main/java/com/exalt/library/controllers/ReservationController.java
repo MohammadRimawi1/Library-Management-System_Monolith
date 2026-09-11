@@ -1,5 +1,6 @@
 package com.exalt.library.controllers;
 
+import com.exalt.library.dto.ReservationDTO;
 import com.exalt.library.dto.ReserveDTO;
 import com.exalt.library.models.reservation.Reservation;
 import com.exalt.library.models.users.Role;
@@ -45,11 +46,11 @@ public class ReservationController  {
         User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
 
         if (currentUser.getRole() == Role.LIBRARIAN || currentUser.getRole() == Role.ADMIN) {
-            return ResponseEntity.ok(ApiResponse.success(200, reservationServices.getAllReservations()));
+            return ResponseEntity.ok(ApiResponse.success(200, reservationServices.getAllReservations().stream().map(ReservationDTO::from).toList()));
         }
 
         List<Reservation> ownReservations = reservationServices.findReservationsByBorrower(currentUser.getBorrower().getId());
-        return ResponseEntity.ok(ApiResponse.success(200, ownReservations));
+        return ResponseEntity.ok(ApiResponse.success(200, ownReservations.stream().map(ReservationDTO::from).toList()));
     }
 
     /**
@@ -87,7 +88,7 @@ public class ReservationController  {
     @GetMapping("/borrower/{borrowerId}")
     public ResponseEntity<Map<String, Object>> findReservationByBorrower(@PathVariable String borrowerId) {
         List<Reservation> reservations = reservationServices.findReservationsByBorrower(borrowerId);
-        return ResponseEntity.ok(ApiResponse.success(200, reservations));
+        return ResponseEntity.ok(ApiResponse.success(200, reservations.stream().map(ReservationDTO::from).toList()));
     }
 
     /**
@@ -103,7 +104,7 @@ public class ReservationController  {
         User currentUser = userServices.findByEmail(SecurityUtils.getCurrentUserEmail());
         Reservation reservation = reservationServices.reserve(currentUser.getBorrower().getId(), reserveDTO.itemId(), reserveDTO.copyId());
 
-        return ResponseEntity.status(201).body(ApiResponse.success(201, reservation));
+        return ResponseEntity.status(201).body(ApiResponse.success(201, ReservationDTO.from(reservation)));
     }
 
     /**
