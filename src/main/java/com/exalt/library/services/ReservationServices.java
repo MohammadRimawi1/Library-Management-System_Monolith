@@ -1,5 +1,6 @@
 package com.exalt.library.services;
 
+import com.exalt.library.exceptions.ConflictException;
 import com.exalt.library.models.libraryitems.physicalitems.PhysicalItem;
 import com.exalt.library.repositories.ReservationRepository;
 import com.exalt.library.services.operations.BorrowerOperations;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * a class representing the services for the reservations
@@ -87,7 +89,8 @@ public class ReservationServices implements ReservationOperations {
                 .filter(reservation -> reservation.getStatus() == ReservationStatus.ACTIVE &&
                         reservation.getBorrower().getId().equals(borrowerId) &&
                         reservation.getLibraryItem().getId().equals(itemId) &&
-                        copyId.equals(reservation.getCopyId()))
+                        Objects.equals(copyId, reservation.getCopyId())
+                )
                 .findFirst()
                 .orElseThrow(() -> new ReservationNotFoundException("Active reservation doesn't exist"));
     }
@@ -143,6 +146,14 @@ public class ReservationServices implements ReservationOperations {
     public Reservation reserve(String borrowerId, String itemId, String copyId) {
         LibraryItem item = checkForLibraryItem(itemId);
         Borrower borrower = checkForBorrower(borrowerId);
+
+        boolean alreadyReserved = reservationRepository.findByBorrowerId(borrower.getId()).stream()
+                .anyMatch(r -> r.getLibraryItem().getId().equals(item.getId()) &&
+                        (r.getStatus() == ReservationStatus.ACTIVE || r.getStatus() == ReservationStatus.PENDING));
+
+        if (alreadyReserved) {
+            throw new ConflictException("You already have a reservation for this item");
+        }
 
         if (item instanceof PhysicalItem && !Validator.notBlank(copyId)) {
             throw new IllegalArgumentException("CopyId is required for physical items");
