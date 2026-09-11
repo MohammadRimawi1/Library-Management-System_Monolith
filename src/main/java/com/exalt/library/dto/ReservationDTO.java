@@ -18,7 +18,8 @@ public record ReservationDTO(
         String borrowerName,
         ReservationStatus status,
         java.util.Date reservationDate,
-        java.util.Date dueDate
+        java.util.Date dueDate,
+        java.util.Date returnDate
 ) {
     /**
      * builds a ReservationDTO from a Reservation entity
@@ -36,7 +37,8 @@ public record ReservationDTO(
                 reservation.getBorrower().getName(),
                 reservation.getStatus(),
                 reservation.getStartDate(),
-                reservation.getEndDate()
+                reservation.getEndDate(),
+                reservation.getReturnDate()
         );
     }
 }
