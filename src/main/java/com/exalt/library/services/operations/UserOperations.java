@@ -21,7 +21,7 @@ public interface UserOperations {
      * @param registerDTO
      * @return
      */
-    public User register(RegisterDTO registerDTO);
+    public LoginResult register(RegisterDTO registerDTO);
 
     /**
      * finds a user by their email
