@@ -1,14 +1,14 @@
 server:
-  port: ${PORT}
+  port: 8080
 
 Spring:
   mongodb:
-    uri: ${MONGO_URI}
+    uri: mongodb+srv://mohammadrimawi47_db_user:vN7qL2xR9tK4wP8zM6cY3hF5@cluster0.yab3irw.mongodb.net/library_ms?appName=Cluster0
 
 library:
-  admin-email: ${ADMIN_EMAIL}
-  admin-password: ${ADMIN_PASSWORD}
+  admin-email: admin@gmail.com
+  admin-password: $2a$10$PIgptFy/al6wRILH6B2cfuLOaeQ/coZHcNrXmQmu30DMdp8E0upla
 
   jwt:
-    secret: ${JWT_SECRET}
-    expiration-ms: 86400000 # 24 hours
+    secret: 7fK2mQ9xV4rT8nL6pZ3wH1cY5sA0dE8uJ9bX6gN2vR4kP7tM
+    expiration-ms: 86400000
