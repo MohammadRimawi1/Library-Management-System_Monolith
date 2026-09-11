@@ -69,7 +69,7 @@ public class UserServices implements UserOperations {
      * validates, then creates the User and a linked Borrower
      */
     @Override
-    public User register(RegisterDTO registerDTO) {
+    public LoginResult register(RegisterDTO registerDTO) {
         RegisterValidator.validate(registerDTO);
 
         if (userExists(registerDTO.email())) {
@@ -88,7 +88,9 @@ public class UserServices implements UserOperations {
         Borrower savedBorrower = borrowerRepository.save(borrower);
         user.setBorrower(savedBorrower);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user); // your existing save call
+        String token = jwtService.generateToken(savedUser.getEmail(), savedUser.getRole().name());
+        return new LoginResult(token, savedUser);
     }
 
     /**

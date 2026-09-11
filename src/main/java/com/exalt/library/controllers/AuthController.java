@@ -39,8 +39,20 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@RequestBody RegisterDTO request) {
-        User user = userServices.register(request);
-        return ResponseEntity.status(201).body(ApiResponse.success(201, Map.of("email", user.getEmail(), "role", user.getRole())));
+        LoginResult result = userServices.register(request);
+        User user = result.user();
+
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id", user.getId());
+        userMap.put("name", user.getName());
+        userMap.put("email", user.getEmail());
+        userMap.put("role", user.getRole());
+        userMap.put("phoneNumber", user.getBorrower() != null ? user.getBorrower().getPhoneNumber() : null);
+
+        return ResponseEntity.status(201).body(ApiResponse.success(201, Map.of(
+                "token", result.token(),
+                "user", userMap
+        )));
     }
 
     /**
