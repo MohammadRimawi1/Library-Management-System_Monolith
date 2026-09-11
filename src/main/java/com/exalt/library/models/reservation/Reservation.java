@@ -31,6 +31,7 @@ public class Reservation {
     private Date endDate; // Defines when the reservation date ends
     private ReservationStatus status; // Defines the status of the reservation
     private String copyId; // which specific physical copy this reservation is bound to
+    private Date returnDate; // when this reservation was actually returned, null until then
 
     @Version
     private Long version; // used by Spring Data for optimistic locking
@@ -108,6 +109,14 @@ public class Reservation {
         return copyId;
     }
 
+    /**
+     *  method for getting the return date for the reservation
+     * @return
+     */
+    public Date getReturnDate() {
+        return returnDate;
+    }
+
     //    ==== GETTERS ====
 
 //    ==== SETTERS ====
@@ -161,6 +170,13 @@ public class Reservation {
         this.copyId = copyId;
     }
 
+    /**
+     * a method for setting the return date for the reservation
+     * @param returnDate
+     */
+    public void setReturnDate(Date returnDate) {
+        this.returnDate = returnDate;
+    }
     //    ==== SETTERS ====
 
     @Override

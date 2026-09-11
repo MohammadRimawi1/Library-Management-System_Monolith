@@ -217,6 +217,7 @@ public class ReservationServices implements ReservationOperations {
     @Override
     public void closeReservation(Reservation reservation, LibraryItem libraryItem) {
         reservation.setStatus(ReservationStatus.RETURNED);
+        reservation.setReturnDate(new Date());
         borrowStrategyFactory.resolve(libraryItem).returnItem(reservation);
         reservationRepository.save(reservation);
 
