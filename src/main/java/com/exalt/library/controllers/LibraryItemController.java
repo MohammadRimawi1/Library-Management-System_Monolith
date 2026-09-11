@@ -1,6 +1,7 @@
 package com.exalt.library.controllers;
 
 import com.exalt.library.dto.LibraryItemDTO;
+import com.exalt.library.dto.LibraryItemResponseDTO;
 import com.exalt.library.models.libraryitems.LibraryItem;
 import com.exalt.library.services.LibraryItemServices;
 import com.exalt.library.util.ApiResponse;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +36,10 @@ public class LibraryItemController {
      */
     @GetMapping
     public ResponseEntity<Map<String, Object>> findAll() {
-        return ResponseEntity.ok(ApiResponse.success(200, libraryItemServices.getAllItems()));
+        List<LibraryItemResponseDTO> items = libraryItemServices.getAllItems().stream()
+                .map(LibraryItemResponseDTO::from)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.success(200, items));
     }
 
     /**
@@ -46,7 +51,7 @@ public class LibraryItemController {
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> findById(@PathVariable String id) {
         LibraryItem libraryItem = libraryItemServices.findItemById(id);
-        return ResponseEntity.ok(ApiResponse.success(200, libraryItem));
+        return ResponseEntity.ok(ApiResponse.success(200, LibraryItemResponseDTO.from(libraryItem)));
     }
 
     /**
